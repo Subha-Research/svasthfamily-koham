@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  # pariwar-koham:
+  #   # If image present the load image else build
+  #   # if build also doesn't exist.
+  #   # image:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./
+  #     target: dev
+  #   volumes:
+  #     - type: volume
+  #       source: pariwar-koham-app-volume
+  #       target: /app
+  #   ports:
+  #     - "8080:8080"
+  #   links:
+  #     - pariwar-koham-db:pariwar-koham-db
+  #   depends_on:
+  #     - pariwar-koham-db
+  #     - pariwar-koham-redis
+  pariwar-koham-db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root@123
+      MONGO_INITDB_USERNAME: koham
+      MONGO_INITDB_PASSWORD: koham
+      MONGO_INITDB_DATABASE: koham
+    volumes:
+      - type: volume
+        source: pariwar-koham-db-volume
+        target: /data/db
+  pariwar-koham-redis:
+    image: redis
+    ports:
+      - "6377:6379"
+    volumes:
+      - type: volume
+        source: pariwar-koham-redis-volume
+        target: /data
+volumes:
+  pariwar-koham-app-volume:
+  pariwar-koham-db-volume:
+  pariwar-koham-redis-volume:
