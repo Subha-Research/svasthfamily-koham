@@ -13,6 +13,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /pariwar-koham
+RUN go build -o /koham
 EXPOSE 8080
-CMD [ "/pariwar-koham" ]
+CMD [ "/koham" ]

@@ -1,9 +1,9 @@
-# pariwar-koham
-Pariwar Role, Access and Token Management Service
+# koham
+Role, Access and Token Management Service
 ## Setup and Run
   ### Using Dockerfile - (Has a bug, refrain using while development)
-  <!-- 1. Build docker - `docker build -t pariwar-koham .`
-  2. Run Docker - `docker run -it -p 8080:8080 pariwar-koham` -->
+  <!-- 1. Build docker - `docker build -t koham .`
+  2. Run Docker - `docker run -it -p 8080:8080 koham` -->
   ### Run using go
   <!-- 1. Using docker compose to run mysql and redis - `docker compose up -d` -->
   2. Download dependencies - `go mod download`

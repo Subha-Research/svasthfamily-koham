@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Subha-Research/pariwar-koham/app"
+import "github.com/Subha-Research/koham/app"
 
 func main() {
 	app := app.SetupApp()
