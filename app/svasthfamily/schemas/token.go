@@ -1,1 +1,1 @@
-package schemas
+package sf_schemas
