@@ -1,0 +1,13 @@
+{
+    "type": "json",
+    "db": {
+        "username": "root",
+        "password": "root@123",
+        "database": "koham",
+        "port": "27017",
+        "host": "127.0.0.1",
+        "maxPoolSize": 100
+    },
+    "redis": {},
+    "logger": {}
+}

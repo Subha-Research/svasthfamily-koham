@@ -1,8 +1,6 @@
 package app
 
 import (
-	"log"
-
 	routes "github.com/Subha-Research/koham/app/routes/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -11,7 +9,6 @@ import (
 func SetupApp() *fiber.App {
 	app := fiber.New()
 	app.Use(logger.New())
-	log.Println("Setup app getting called")
 	routes.SetupPingRoute(app)
 	// routes.SetupRoutes(app)
 

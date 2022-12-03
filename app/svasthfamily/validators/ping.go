@@ -1,4 +1,4 @@
-package validators
+package sf_validators
 
 import "github.com/gofiber/fiber/v2"
 

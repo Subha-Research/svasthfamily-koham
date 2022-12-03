@@ -1,8 +1,8 @@
-package controllers
+package sf_controllers
 
 import (
-	"github.com/Subha-Research/koham/app/services/v1"
-	"github.com/Subha-Research/koham/app/validators"
+	pariwar_services "github.com/Subha-Research/koham/app/svasthfamily/services/v1"
+	sf_validators "github.com/Subha-Research/koham/app/svasthfamily/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,12 +18,12 @@ func PingHandler(c *fiber.Ctx) error {
 		return err
 	}
 
-	err := validators.ValidatePing(p.Name)
+	err := sf_validators.ValidatePing(p.Name)
 	if err != nil {
 		return err
 	}
 
-	services.PingHandler(p.Name, p.Pass)
+	pariwar_services.PingHandler(p.Name, p.Pass)
 	return c.Status(fiber.StatusOK).SendString("Ping is working.")
 }
 
