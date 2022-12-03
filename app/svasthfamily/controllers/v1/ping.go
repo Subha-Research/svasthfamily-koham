@@ -1,29 +1,32 @@
 package sf_controllers
 
 import (
+	"log"
+
 	pariwar_services "github.com/Subha-Research/koham/app/svasthfamily/services/v1"
 	sf_validators "github.com/Subha-Research/koham/app/svasthfamily/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
-type Person struct {
-	Name string `json:"name"`
-	Pass string `json:"pass"`
-}
-
 func PingHandler(c *fiber.Ctx) error {
+	type Person struct {
+		NameA string `json:"name_a" form:"name_a"`
+		Pass  string `json:"pass" form:"pass"`
+	}
+
 	p := new(Person)
 
-	if err := c.BodyParser(p); err != nil {
+	if err := c.BodyParser(&p); err != nil {
 		return err
 	}
 
-	err := sf_validators.ValidatePing(p.Name)
+	log.Println("HERE ", p.NameA)
+	err := sf_validators.ValidatePing(p.NameA)
 	if err != nil {
 		return err
 	}
 
-	pariwar_services.PingHandler(p.Name, p.Pass)
+	pariwar_services.PingHandler(p.NameA, p.Pass)
 	return c.Status(fiber.StatusOK).SendString("Ping is working.")
 }
 

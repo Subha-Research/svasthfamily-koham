@@ -1,8 +1,13 @@
 package sf_validators
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func ValidatePing(name string) error {
+	log.Println(name)
 	if len(name) < 10 {
 		return fiber.NewError(fiber.StatusBadRequest, "Length size is less than 10")
 	}
