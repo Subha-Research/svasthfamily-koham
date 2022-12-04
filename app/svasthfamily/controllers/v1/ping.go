@@ -3,7 +3,7 @@ package sf_controllers
 import (
 	"log"
 
-	pariwar_services "github.com/Subha-Research/koham/app/svasthfamily/services/v1"
+	sf_services "github.com/Subha-Research/koham/app/svasthfamily/services/v1"
 	sf_validators "github.com/Subha-Research/koham/app/svasthfamily/validators"
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,10 +26,14 @@ func PingHandler(c *fiber.Ctx) error {
 		return err
 	}
 
-	pariwar_services.PingHandler(p.NameA, p.Pass)
-	return c.Status(fiber.StatusOK).SendString("Ping is working.")
+	err_service := sf_services.PingHandler(p.NameA, p.Pass)
+	if err_service != nil {
+		return err_service
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Ping POST is working.")
 }
 
 func PingGetHandler(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).SendString("Ping is working.")
+	return c.Status(fiber.StatusOK).SendString("Ping is not working.")
 }
