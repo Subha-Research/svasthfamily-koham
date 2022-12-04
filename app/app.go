@@ -20,7 +20,6 @@ func SetupApp() *fiber.App {
 
 	rm := sf_models.RoleModel{}
 	rm.InsertAllRoles(collection)
-
 	routes.SetupRoutes(app)
 
 	// Return configured app
