@@ -27,5 +27,6 @@ func (tc *TokenController) Post(c *fiber.Ctx) error {
 	// if err != nil {
 	// 	return errors.DefaultErrorHandler(c, err)
 	// }
-	return nil
+
+	return c.Status(fiber.StatusCreated).SendString("Token creation successful")
 }

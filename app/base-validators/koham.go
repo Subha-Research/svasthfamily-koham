@@ -1,6 +1,7 @@
 package base_validators
 
 import (
+	"log"
 	"strings"
 
 	"github.com/Subha-Research/koham/app/errors"
@@ -21,13 +22,14 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 	resource_type := c.Params("resource_type")
 	if resource_type == "tokens" {
 
+		log.Println(c.Get("x-service-id"))
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {
 			return errors.NewError("KSE-4002")
 		}
 		// Validate if the x-service-token is supported by
 		// CLEANUPS:: remove hardcoded x_service_id
-		if x_service_id.String() != bv.XServiceID {
+		if x_service_id.String() != XServiceID {
 			return errors.NewError("KSE-4005")
 		}
 	} else if resource_type == "acls" {

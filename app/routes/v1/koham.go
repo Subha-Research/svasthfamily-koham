@@ -14,7 +14,7 @@ func SetupRoutes(app *fiber.App) {
 	v1 := api.Group("/:stakeholder_type/:user_type/:user_id/:resource_type")
 
 	// Fiber middleware to validate headers.
-	api.Use("/", func(c *fiber.Ctx) error {
+	v1.Use("/", func(c *fiber.Ctx) error {
 		// Validate headers if headers has required keys or not.
 		bv := base_validators.BaseValidator{}
 		err := bv.ValidateHeaders(c)
