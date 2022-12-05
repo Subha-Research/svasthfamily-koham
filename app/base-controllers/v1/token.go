@@ -12,7 +12,21 @@ func (btc *BaseTokenController) GetHandler(c *fiber.Ctx) error {
 	stakeholder_type := c.Params("stakeholder_type")
 	user_type := c.Params("user_type")
 
+	// CLEANUPS:: Remove hardcoded values
 	if stakeholder_type == "family" && user_type == "users" {
+		controller := sf_controllers.TokenController{}
+		return controller.Get(c)
+	}
+	return nil
+}
+
+func (btc *BaseTokenController) PostHandler(c *fiber.Ctx) error {
+	stakeholder_type := c.Params("stakeholder_type")
+	user_type := c.Params("user_type")
+
+	// CLEANUPS:: Remove hardcoded values
+	if stakeholder_type == "family" && user_type == "users" {
+		// Validate headers
 		controller := sf_controllers.TokenController{}
 		return controller.Get(c)
 	}
