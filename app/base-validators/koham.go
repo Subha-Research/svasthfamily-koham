@@ -8,7 +8,10 @@ import (
 )
 
 type BaseValidator struct {
+	XServiceID string
 }
+
+const XServiceID = "d8c3eed5-8eda-441e-bcc1-16fab23b3ab7"
 
 func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) *fiber.Error {
 	if c.Get("Content-Type") != "application/json" {
@@ -17,9 +20,15 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) *fiber.Error {
 	}
 	resource_type := c.Params("resource_type")
 	if resource_type == "tokens" {
-		_, err := uuid.Parse(c.Get("x-service-id"))
+
+		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, "KSE-4002")
+		}
+		// Validate if the x-service-token is supported by
+		// CLEANUPS:: remove hardcoded x_service_id
+		if x_service_id.String() != bv.XServiceID {
+			return fiber.NewError(fiber.StatusUnauthorized, "KSE-4005")
 		}
 	} else if resource_type == "acls" {
 		auth := c.Get("Authorization")

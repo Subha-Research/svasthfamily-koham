@@ -12,4 +12,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4002": {"KSE-4002", "x-service-id header parsing error."},
 	"KSE-4003": {"KSE-4003", "Authorization header missing."},
 	"KSE-4004": {"KSE-4004", "Authorization header format is incorrect."},
+	"KSE-4005": {"KSE-4005", "You are not authorized to access this resource."},
 }

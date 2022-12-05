@@ -28,7 +28,7 @@ func (btc *BaseTokenController) PostHandler(c *fiber.Ctx) error {
 	if stakeholder_type == "family" && user_type == "users" {
 		// Validate headers
 		controller := sf_controllers.TokenController{}
-		return controller.Get(c)
+		return controller.Post(c)
 	}
 	return nil
 }

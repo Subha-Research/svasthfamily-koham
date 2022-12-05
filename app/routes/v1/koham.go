@@ -15,8 +15,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Fiber middleware to validate headers.
 	api.Use("/", func(c *fiber.Ctx) error {
-		// Validate headers if headers has required
-		// keys or not.
+		// Validate headers if headers has required keys or not.
 		bv := base_validators.BaseValidator{}
 		err := bv.ValidateHeaders(c)
 		if err != nil {

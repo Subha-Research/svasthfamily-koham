@@ -27,7 +27,7 @@ func (btc *BaseController) PostHandler(c *fiber.Ctx) error {
 
 	// CLEANUPS:: Remove hardcoded values
 	if resource_type == "tokens" {
-		btc := BaseACLController{}
+		btc := BaseTokenController{}
 		return btc.PostHandler(c)
 	} else if resource_type == "acls" {
 		acl_controller := BaseACLController{}
