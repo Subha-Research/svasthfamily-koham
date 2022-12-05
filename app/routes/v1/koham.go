@@ -3,7 +3,7 @@ package routes
 import (
 	base_controllers "github.com/Subha-Research/koham/app/base-controllers/v1"
 	base_validators "github.com/Subha-Research/koham/app/base-validators"
-	errors "github.com/Subha-Research/koham/app/errors"
+	"github.com/Subha-Research/koham/app/errors"
 	"github.com/gofiber/fiber/v2"
 )
 

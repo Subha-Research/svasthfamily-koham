@@ -23,7 +23,7 @@ func (rm *RoleModel) InsertAllRoles(coll *mongo.Collection) {
 
 	var roleDocs []interface{}
 	roleEnums := sf_enums.RoleEnums
-	for i := 0; i < 2; i++ {
+	for i := 0; i < len(roleEnums); i++ {
 		var roleInterface interface{}
 		role := &sf_schemas.RoleSchema{
 			RoleID:   uuid.NewString(),
@@ -43,5 +43,5 @@ func (rm *RoleModel) InsertAllRoles(coll *mongo.Collection) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("inserted documents with IDs %v\n", res.InsertedIDs)
+	fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
 }
