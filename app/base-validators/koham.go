@@ -10,7 +10,6 @@ import (
 )
 
 type BaseValidator struct {
-	XServiceID string
 }
 
 const XServiceID = "d8c3eed5-8eda-441e-bcc1-16fab23b3ab7"

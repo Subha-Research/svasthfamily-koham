@@ -35,5 +35,5 @@ func PingHandler(c *fiber.Ctx) error {
 }
 
 func PingGetHandler(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).SendString("Ping is not working.")
+	return c.Status(fiber.StatusOK).SendString("Ping is working.")
 }
