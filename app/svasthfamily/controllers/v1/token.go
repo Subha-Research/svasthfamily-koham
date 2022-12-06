@@ -7,11 +7,11 @@ import (
 type TokenController struct {
 }
 
-func (tc *TokenController) Get(c *fiber.Ctx) error {
+func (tc TokenController) Get(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Get Family token.")
 }
 
-func (tc *TokenController) Post(c *fiber.Ctx) error {
+func (tc TokenController) Post(c *fiber.Ctx) error {
 	// f_user_id := c.Params("user_id")
 
 	// tpb := new(sf_validators.TokenPostBody)
@@ -29,4 +29,12 @@ func (tc *TokenController) Post(c *fiber.Ctx) error {
 	// }
 
 	return c.Status(fiber.StatusCreated).SendString("Token creation successful")
+}
+
+func (tc TokenController) Put(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusCreated).SendString("Token PUT called")
+}
+
+func (tc TokenController) Delete(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusCreated).SendString("Token DELETE called")
 }

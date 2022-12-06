@@ -11,6 +11,7 @@ func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/v1")
 
 	bc := base_controllers.BaseController{}
+
 	v1 := api.Group("/:stakeholder_type/:user_type/:user_id/:resource_type")
 
 	// Fiber middleware to validate headers.
