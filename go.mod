@@ -3,7 +3,6 @@ module github.com/Subha-Research/koham
 go 1.19
 
 require (
-	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/google/uuid v1.3.0
 	github.com/knadh/koanf v1.4.4
@@ -13,11 +12,9 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
-	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
@@ -27,6 +24,7 @@ require (
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.41.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
