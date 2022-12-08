@@ -9,7 +9,12 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func SetupApp() *fiber.App {
+type KohamApp struct {
+	role_model sf_models.RoleModel
+	// access_model sf_models.AccessModel
+}
+
+func (k_app *KohamApp) SetupApp() *fiber.App {
 	app := fiber.New()
 	app.Use(logger.New())
 	routes.SetupPingRoute(app)
@@ -17,9 +22,9 @@ func SetupApp() *fiber.App {
 	database := sf_models.Database{}
 	collection, _, err := database.GetCollectionAndSession("sf_roles")
 	log.Println(collection, err)
-
-	rm := sf_models.RoleModel{}
-	rm.InsertAllRoles(collection)
+	// Dependency injection pattern
+	k_app.role_model.Collection = collection
+	k_app.role_model.InsertAllRoles()
 	routes.SetupRoutes(app)
 
 	// Return configured app

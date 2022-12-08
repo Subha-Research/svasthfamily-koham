@@ -9,6 +9,7 @@ import (
 	sf_schemas "github.com/Subha-Research/koham/app/svasthfamily/schemas"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -18,30 +19,59 @@ type RoleModel struct {
 	Session    *mongo.Session
 }
 
-func (rm *RoleModel) InsertAllRoles(coll *mongo.Collection) {
-	// var collection = rco
-
-	var roleDocs []interface{}
-	roleEnums := sf_enums.RoleEnums
-	for i := 0; i < len(roleEnums); i++ {
-		var roleInterface interface{}
-		role := &sf_schemas.RoleSchema{
-			RoleID:   uuid.NewString(),
-			RoleEnum: i,
-			RoleKey:  roleEnums[i],
-			IsActive: true,
-			IsDelete: false,
+func (rm *RoleModel) GetRole(role_enum int, role_key string) (bson.M, error) {
+	var result bson.M
+	err := rm.Collection.FindOne(
+		context.TODO(),
+		bson.D{{Key: "role_enum", Value: role_enum}, {Key: "role_key", Value: role_key}},
+	).Decode(&result)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in
+		// the collection.
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
 		}
-		// Convert role struct to interface
-		roleInterface = role
-		roleDocs = append(roleDocs, roleInterface)
+		return nil, err
+	}
+	fmt.Printf("found document %v", result)
+	return result, nil
+}
+
+func (rm *RoleModel) InsertAllRoles() error {
+	// Colllection variable is set via Dependency injection from app file
+	var role_docs []interface{}
+	role_map := sf_enums.Roles
+	for i := 0; i < len(role_map); i++ {
+		// Check first if the same role already exists
+		// If exist then do not insert that
+		doc, err := rm.GetRole(i, role_map[i])
+		if doc != nil {
+			continue
+		} else if doc == nil && err == nil {
+			role := &sf_schemas.RoleSchema{
+				RoleID:   uuid.NewString(),
+				RoleEnum: i,
+				RoleKey:  role_map[i],
+				IsActive: true,
+				IsDelete: false,
+			}
+			// Convert role struct to interface
+			// roleInterface = role
+			role_docs = append(role_docs, role)
+		} else {
+			log.Fatal("Error in getting roles, stopping server", err)
+		}
 	}
 
 	// Call insert many of mongo
-	opts := options.InsertMany().SetOrdered(false)
-	res, err := coll.InsertMany(context.TODO(), roleDocs, opts)
-	if err != nil {
-		log.Fatal(err)
+	if len(role_docs) > 0 {
+		opts := options.InsertMany().SetOrdered(false)
+		res, err := rm.Collection.InsertMany(context.TODO(), role_docs, opts)
+		if err != nil {
+			log.Fatal("Error in inserting role. Stopping server", err)
+			return err
+		}
+		fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
 	}
-	fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
+	return nil
 }

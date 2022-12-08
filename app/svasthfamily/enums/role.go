@@ -6,3 +6,7 @@ type RoleInfo struct {
 }
 
 var RoleEnums = []string{"SF_HEAD", "SF_MEMBER"}
+var Roles = map[int]string{
+	0: "SF_HEAD",
+	1: "SF_MEMBER",
+}

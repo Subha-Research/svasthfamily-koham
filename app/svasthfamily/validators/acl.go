@@ -22,12 +22,14 @@ type ACLPostBody struct {
 	ChildMemberIDS []string `json:"child_member_ids" validate:"required,min=1,dive,uuid4_rfc4122"`
 	ParentMemberID string   `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
 	AccessEnums    []int    `json:"accesses" validate:"required,min=1,dive,number"`
+	RoleEnum       int      `json:"role" validate:"required,number"`
 }
 
 type ACLPutBody struct {
 	ChildMemberIDS []string `json:"child_member_ids" validate:"required,min=1,dive,uuid4_rfc4122"`
 	ParentMemberID string   `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
 	AccessEnums    []int    `json:"accesses" validate:"required,min=1,dive,number"`
+	RoleEnum       int      `json:"role" validate:"required,number"`
 }
 
 type ACLValidator struct {
@@ -45,5 +47,6 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 			return errors.KohamError("KSE-4006", error_data)
 		}
 	}
+	// Validate if we support the given role of
 	return nil
 }

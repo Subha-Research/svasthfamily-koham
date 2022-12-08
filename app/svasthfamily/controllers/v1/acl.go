@@ -22,7 +22,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	// Implement dependeny injection
 	// Insert into database
 	// Implement DTO
-	f_user_id := c.Params("user_id")
+	sf_user_id := c.Params("user_id")
 
 	aclpb := new(sf_validators.ACLPostBody)
 	if err := c.BodyParser(aclpb); err != nil {
@@ -40,7 +40,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	}
 	// Call service
 	acl_s := sf_services.ACLService{}
-	if err := acl_s.CreateSFRelationship(f_user_id, *aclpb); err != nil {
+	if err := acl_s.CreateSFRelationship(sf_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	return c.Status(fiber.StatusOK).SendString("POST family ACL")
