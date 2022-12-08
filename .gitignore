@@ -26,3 +26,4 @@ hs_err_pid*
 app/.DS_Store
 app/svasthfamily/.DS_Store
 .vscode/
+__debug_bin

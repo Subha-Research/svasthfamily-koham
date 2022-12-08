@@ -27,7 +27,8 @@ func TestPingRoute(t *testing.T) {
 		},
 	}
 
-	app := app.SetupApp()
+	app := app.KohamApp{}
+	koham_app := app.SetupApp()
 	// Iterate through testcases
 	for _, test := range tests {
 		req, _ := http.NewRequest(
@@ -37,7 +38,7 @@ func TestPingRoute(t *testing.T) {
 		)
 
 		// The -1 disables request latency.
-		res, _ := app.Test(req, -1)
+		res, _ := koham_app.Test(req, -1)
 
 		// Verify if the status code is as expected
 		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
