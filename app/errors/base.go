@@ -37,8 +37,9 @@ func ReplaceDynamicVars(error_msg string, data map[string]string) string {
 
 	for i := 0; i < len(dynamic_vars); i++ {
 		d_var := dynamic_vars[i]
-		if _, ok := data[d_var]; ok {
-			error_msg = strings.Replace(error_msg, d_var, data[d_var], 1)
+		trimmed_var := strings.ReplaceAll(d_var, ":", "")
+		if _, ok := data[trimmed_var]; ok {
+			error_msg = strings.Replace(error_msg, d_var, data[trimmed_var], 1)
 		} else {
 			return ""
 		}
@@ -46,12 +47,12 @@ func ReplaceDynamicVars(error_msg string, data map[string]string) string {
 	return error_msg
 }
 
-// NewError creates a new Error instance with an optional data
-func NewError(error_code string, data ...map[string]string) *Error {
+// KohamError creates a Error instance with an optional data
+func KohamError(error_code string, data ...map[string]string) *Error {
 	err := &Error{
 		ErrorCode:  error_code,
 		StatusCode: 500,
-		Message:    "Internal Server Error",
+		Message:    "Internal Server Error.",
 	}
 
 	if _, ok := ErrorEnums[error_code]; ok {
@@ -76,14 +77,25 @@ func NewError(error_code string, data ...map[string]string) *Error {
 
 var DefaultErrorHandler = func(c *fiber.Ctx, err error) error {
 	// Status code defaults to 500
-	code := fiber.StatusInternalServerError
+	default_error := &Error{
+		ErrorCode:  "KSE-5001",
+		StatusCode: 500,
+		Message:    "Internal Server Error",
+	}
 
 	// Retrieve the custom status code if it's a *fiber.Error
 	var e *Error
+	var fe *fiber.Error
 	if errors.As(err, &e) {
-		code = e.StatusCode
+		default_error.StatusCode = e.StatusCode
+		default_error.ErrorCode = e.ErrorCode
+		default_error.Message = e.Message
+	} else if errors.As(err, &fe) {
+		default_error.ErrorCode = "KSE-0000"
+		default_error.Message = fe.Message
+		default_error.StatusCode = fe.Code
 	}
 
 	// Return status code with error json
-	return c.Status(code).JSON(err)
+	return c.Status(default_error.StatusCode).JSON(default_error)
 }

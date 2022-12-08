@@ -28,7 +28,7 @@ func (bc BaseController) PostHandler(c *fiber.Ctx) error {
 	if resource_type == "tokens" {
 		return interfaces.IRequest.Post(BaseTokenController{}, c)
 	} else if resource_type == "acls" {
-		return interfaces.IRequest.Get(BaseACLController{}, c)
+		return interfaces.IRequest.Post(BaseACLController{}, c)
 	} else {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
 	}
