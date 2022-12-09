@@ -21,13 +21,17 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 
 	database := sf_models.Database{}
 	role_coll, _, err := database.GetCollectionAndSession("sf_roles")
-	log.Println(role_coll, err)
+	if err != nil {
+		log.Fatal("Errro in  getting collection and session. Stopping server", err)
+	}
 	// Dependency injection pattern
 	k_app.role_model.Collection = role_coll
 	k_app.role_model.InsertAllRoles()
 
 	access_coll, _, err := database.GetCollectionAndSession("sf_accesses")
-	log.Println(access_coll, err)
+	if err != nil {
+		log.Fatal("Error in  getting collection and session. Stopping server", err)
+	}
 	// Dependency injection pattern
 	k_app.access_model.Collection = access_coll
 	k_app.access_model.InsertAllAccesses()

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Subha-Research/koham/app/errors"
+	sf_enums "github.com/Subha-Research/koham/app/svasthfamily/enums"
 	validator "github.com/go-playground/validator/v10"
 )
 
@@ -35,6 +36,22 @@ type ACLPutBody struct {
 type ACLValidator struct {
 }
 
+func (av *ACLValidator) validateAccess(a_enums []int) bool {
+	// Run a loop to build freq_hash_map
+	freq_hash_map := map[int]int{}
+
+	for k := range sf_enums.Accesses {
+		freq_hash_map[k] = 1
+	}
+
+	for i := 0; i < len(a_enums); i++ {
+		if freq_hash_map[a_enums[i]] != 1 {
+			return false
+		}
+	}
+	return true
+}
+
 func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 	validate.RegisterTagNameFunc(ExtractTagName)
 	err := validate.Struct(aclpb)
@@ -47,6 +64,16 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 			return errors.KohamError("KSE-4006", error_data)
 		}
 	}
-	// Validate if we support the given role of
+	// Validate if we support the given role and access received in request
+	// LATER CLEANUP:: validate from service by fetching from cache / database
+	// role := aclpb.RoleEnum
+	access_enums := aclpb.AccessEnums
+	is_all_access_present := av.validateAccess(access_enums)
+	if !is_all_access_present {
+		error_data := map[string]string{
+			"key": "accesses",
+		}
+		return errors.KohamError("KSE-4006", error_data)
+	}
 	return nil
 }
