@@ -36,6 +36,14 @@ type ACLPutBody struct {
 type ACLValidator struct {
 }
 
+func (av *ACLValidator) vaidateRole(r_enum int) bool {
+	for k := range sf_enums.Roles {
+		if r_enum == k {
+			return true
+		}
+	}
+	return false
+}
 func (av *ACLValidator) validateAccess(a_enums []int) bool {
 	// Run a loop to build freq_hash_map
 	freq_hash_map := map[int]int{}
@@ -72,6 +80,15 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 	if !is_all_access_present {
 		error_data := map[string]string{
 			"key": "accesses",
+		}
+		return errors.KohamError("KSE-4006", error_data)
+	}
+
+	role_enum := aclpb.RoleEnum
+	is_role_valid := av.vaidateRole(role_enum)
+	if !is_role_valid {
+		error_data := map[string]string{
+			"key": "role",
 		}
 		return errors.KohamError("KSE-4006", error_data)
 	}

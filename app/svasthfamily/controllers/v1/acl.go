@@ -47,7 +47,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 }
 
 func (acl ACLController) Put(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).SendString("PUT famiy ACL")
+	return c.Status(fiber.StatusOK).SendString("PUT family ACL")
 }
 
 func (acl ACLController) Delete(c *fiber.Ctx) error {
