@@ -3,8 +3,8 @@ package app
 import (
 	"log"
 
-	sf_models "github.com/Subha-Research/koham/app/models"
-	routes "github.com/Subha-Research/koham/app/routes/v1"
+	sf_models "github.com/Subha-Research/svasthfamily-koham/app/models"
+	routes "github.com/Subha-Research/svasthfamily-koham/app/routes/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )

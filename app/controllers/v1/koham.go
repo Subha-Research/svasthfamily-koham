@@ -1,7 +1,7 @@
 package sf_controllers
 
 import (
-	"github.com/Subha-Research/koham/app/interfaces"
+	"github.com/Subha-Research/svasthfamily-koham/app/interfaces"
 	"github.com/gofiber/fiber/v2"
 )
 

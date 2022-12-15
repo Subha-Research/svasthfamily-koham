@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	app "github.com/Subha-Research/koham/app"
+	app "github.com/Subha-Research/svasthfamily-koham/app"
 	"github.com/stretchr/testify/assert"
 )
 

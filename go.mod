@@ -1,4 +1,4 @@
-module github.com/Subha-Research/koham
+module github.com/Subha-Research/svasthfamily-koham
 
 go 1.19
 

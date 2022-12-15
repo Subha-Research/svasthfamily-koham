@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/Subha-Research/koham/app/errors"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )

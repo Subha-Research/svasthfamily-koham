@@ -1,9 +1,9 @@
 package sf_controllers
 
 import (
-	"github.com/Subha-Research/koham/app/errors"
-	sf_services "github.com/Subha-Research/koham/app/services/v1"
-	sf_validators "github.com/Subha-Research/koham/app/validators"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
+	sf_services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	sf_validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 

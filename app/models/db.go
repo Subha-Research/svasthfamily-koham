@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/url"
 
-	configs "github.com/Subha-Research/koham/app/configs"
+	configs "github.com/Subha-Research/svasthfamily-koham/app/configs"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

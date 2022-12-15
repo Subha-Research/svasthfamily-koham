@@ -1,6 +1,6 @@
 package main
 
-import app "github.com/Subha-Research/koham/app"
+import app "github.com/Subha-Research/svasthfamily-koham/app"
 
 func main() {
 	app := app.KohamApp{}

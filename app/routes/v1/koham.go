@@ -1,9 +1,9 @@
 package routes
 
 import (
-	base_validators "github.com/Subha-Research/koham/app/base-validators"
-	sf_controllers "github.com/Subha-Research/koham/app/controllers/v1"
-	"github.com/Subha-Research/koham/app/errors"
+	base_validators "github.com/Subha-Research/svasthfamily-koham/app/base-validators"
+	sf_controllers "github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/gofiber/fiber/v2"
 )
 
