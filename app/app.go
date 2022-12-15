@@ -9,17 +9,32 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func SetupApp() *fiber.App {
+type KohamApp struct {
+	role_model   sf_models.RoleModel
+	access_model sf_models.AccessModel
+}
+
+func (k_app *KohamApp) SetupApp() *fiber.App {
 	app := fiber.New()
 	app.Use(logger.New())
 	routes.SetupPingRoute(app)
 
 	database := sf_models.Database{}
-	collection, _, err := database.GetCollectionAndSession("sf_roles")
-	log.Println(collection, err)
+	role_coll, _, err := database.GetCollectionAndSession("sf_roles")
+	if err != nil {
+		log.Fatal("Errro in  getting collection and session. Stopping server", err)
+	}
+	// Dependency injection pattern
+	k_app.role_model.Collection = role_coll
+	k_app.role_model.InsertAllRoles()
 
-	rm := sf_models.RoleModel{}
-	rm.InsertAllRoles(collection)
+	access_coll, _, err := database.GetCollectionAndSession("sf_accesses")
+	if err != nil {
+		log.Fatal("Error in  getting collection and session. Stopping server", err)
+	}
+	// Dependency injection pattern
+	k_app.access_model.Collection = access_coll
+	k_app.access_model.InsertAllAccesses()
 
 	routes.SetupRoutes(app)
 
