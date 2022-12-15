@@ -1,8 +1,8 @@
 package routes
 
 import (
-	base_controllers "github.com/Subha-Research/koham/app/base-controllers/v1"
 	base_validators "github.com/Subha-Research/koham/app/base-validators"
+	sf_controllers "github.com/Subha-Research/koham/app/controllers/v1"
 	"github.com/Subha-Research/koham/app/errors"
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,9 +10,9 @@ import (
 func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/v1")
 
-	bc := base_controllers.BaseController{}
+	bc := sf_controllers.BaseController{}
 
-	v1 := api.Group("/:stakeholder_type/:user_type/:user_id/:resource_type")
+	v1 := api.Group("/family/users/:user_id/:resource_type")
 
 	// Fiber middleware to validate headers.
 	v1.Use("/", func(c *fiber.Ctx) error {

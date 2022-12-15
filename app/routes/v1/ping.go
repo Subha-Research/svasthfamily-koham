@@ -1,7 +1,7 @@
 package routes
 
 import (
-	sf_controllers "github.com/Subha-Research/koham/app/svasthfamily/controllers/v1"
+	sf_controllers "github.com/Subha-Research/koham/app/controllers/v1"
 	"github.com/gofiber/fiber/v2"
 )
 

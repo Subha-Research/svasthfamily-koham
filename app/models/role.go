@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	sf_enums "github.com/Subha-Research/koham/app/svasthfamily/enums"
-	sf_schemas "github.com/Subha-Research/koham/app/svasthfamily/schemas"
+	sf_enums "github.com/Subha-Research/koham/app/enums"
+	sf_schemas "github.com/Subha-Research/koham/app/schemas"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"

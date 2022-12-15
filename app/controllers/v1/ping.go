@@ -3,8 +3,8 @@ package sf_controllers
 import (
 	"log"
 
-	sf_services "github.com/Subha-Research/koham/app/svasthfamily/services/v1"
-	sf_validators "github.com/Subha-Research/koham/app/svasthfamily/validators"
+	sf_services "github.com/Subha-Research/koham/app/services/v1"
+	sf_validators "github.com/Subha-Research/koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 

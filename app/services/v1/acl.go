@@ -1,7 +1,7 @@
 package sf_services
 
 import (
-	sf_validators "github.com/Subha-Research/koham/app/svasthfamily/validators"
+	sf_validators "github.com/Subha-Research/koham/app/validators"
 )
 
 type IACLService interface {

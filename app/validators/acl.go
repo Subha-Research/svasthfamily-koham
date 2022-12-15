@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
+	sf_enums "github.com/Subha-Research/koham/app/enums"
 	"github.com/Subha-Research/koham/app/errors"
-	sf_enums "github.com/Subha-Research/koham/app/svasthfamily/enums"
 	validator "github.com/go-playground/validator/v10"
 )
 
