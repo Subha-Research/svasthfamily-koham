@@ -1,4 +1,4 @@
-package sf_controllers
+package controllers
 
 import (
 	"github.com/Subha-Research/svasthfamily-koham/app/interfaces"

@@ -1,10 +1,10 @@
-package sf_controllers
+package controllers
 
 import (
 	"log"
 
-	sf_services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
-	sf_validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
+	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,12 +21,12 @@ func PingHandler(c *fiber.Ctx) error {
 	}
 
 	log.Println("HERE ", p.NameA)
-	err := sf_validators.ValidatePing(p.NameA)
+	err := validators.ValidatePing(p.NameA)
 	if err != nil {
 		return err
 	}
 
-	err_service := sf_services.PingHandler(p.NameA, p.Pass)
+	err_service := services.PingHandler(p.NameA, p.Pass)
 	if err_service != nil {
 		return err_service
 	}

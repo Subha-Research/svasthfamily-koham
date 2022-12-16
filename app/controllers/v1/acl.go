@@ -1,9 +1,9 @@
-package sf_controllers
+package controllers
 
 import (
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
-	sf_services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
-	sf_validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
+	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,7 +24,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	// Implement DTO
 	sf_user_id := c.Params("user_id")
 
-	aclpb := new(sf_validators.ACLPostBody)
+	aclpb := new(validators.ACLPostBody)
 	if err := c.BodyParser(aclpb); err != nil {
 		// If any error in body parsing of fiber
 		// So we return fiber error
@@ -33,13 +33,13 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 
 	// Request body validation
 	// CLEANUP:: Access using interface
-	acl_validator := sf_validators.ACLValidator{}
+	acl_validator := validators.ACLValidator{}
 	err := acl_validator.ValidateACLPostBody(*aclpb)
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	// Call service
-	acl_s := sf_services.ACLService{}
+	acl_s := services.ACLService{}
 	if err := acl_s.CreateSFRelationship(sf_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}

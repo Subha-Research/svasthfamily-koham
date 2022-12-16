@@ -2,7 +2,7 @@ package routes
 
 import (
 	base_validators "github.com/Subha-Research/svasthfamily-koham/app/base-validators"
-	sf_controllers "github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
+	controllers "github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,7 +10,7 @@ import (
 func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/v1")
 
-	bc := sf_controllers.BaseController{}
+	bc := controllers.BaseController{}
 
 	v1 := api.Group("/family/users/:user_id/:resource_type")
 

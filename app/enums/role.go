@@ -1,4 +1,4 @@
-package sf_enums
+package enums
 
 var Roles = map[int]string{
 	0: "SF_HEAD",

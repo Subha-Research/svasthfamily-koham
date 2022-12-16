@@ -1,4 +1,4 @@
-package sf_schemas
+package schemas
 
 type RoleSchema struct {
 	RoleID   string `bson:"role_id" json:"role_id"`

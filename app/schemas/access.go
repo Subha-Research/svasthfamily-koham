@@ -1,4 +1,4 @@
-package sf_schemas
+package schemas
 
 type Access struct {
 	AccessID   string `bson:"access_id" json:"access_id"`

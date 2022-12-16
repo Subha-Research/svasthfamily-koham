@@ -1,4 +1,4 @@
-package sf_schemas
+package schemas
 
 import "time"
 

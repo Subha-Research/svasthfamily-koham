@@ -1,4 +1,4 @@
-package sf_enums
+package enums
 
 var Accesses = map[int]string{
 	// SF: svasthfamily

@@ -1,1 +1,1 @@
-package sf_controllers_test
+package controllers_test

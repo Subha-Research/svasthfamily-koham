@@ -1,4 +1,4 @@
-package sf_services
+package services
 
 import (
 	"log"
