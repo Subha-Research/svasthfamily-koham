@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -12,7 +13,9 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 }
 
 func (tc TokenController) Post(c *fiber.Ctx) error {
-	// f_user_id := c.Params("user_id")
+	f_user_id := c.Params("user_id")
+	ts := services.TokenService{}
+	ts.CreateToken(f_user_id)
 
 	// tpb := new(validators.TokenPostBody)
 	// if err := c.BodyParser(tpb); err != nil {
