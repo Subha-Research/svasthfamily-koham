@@ -2,7 +2,7 @@ package schemas
 
 import "time"
 
-type Token struct {
+type TokenSchema struct {
 	TokenID      string      `bson:"token_id" json:"token_id"`
 	TokenKey     string      `bson:"token_key" json:"token_key"`
 	ExpiresAt    time.Time   `bson:"expires_at" json:"expires_at"`
