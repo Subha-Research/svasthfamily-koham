@@ -1,4 +1,4 @@
-package sf_models
+package models
 
 import (
 	"context"
