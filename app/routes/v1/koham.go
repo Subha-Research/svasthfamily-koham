@@ -12,7 +12,7 @@ func SetupRoutes(app *fiber.App) {
 
 	bc := controllers.BaseController{}
 
-	v1 := api.Group("/family/users/:user_id/:resource_type")
+	v1 := api.Group("/family/users/:user_id/:resource_type/:validate?")
 
 	// Fiber middleware to validate headers.
 	v1.Use("/", func(c *fiber.Ctx) error {
