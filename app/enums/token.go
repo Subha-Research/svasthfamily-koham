@@ -1,1 +1,1 @@
-package sf_enums
+package enums

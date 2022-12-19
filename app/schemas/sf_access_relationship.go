@@ -1,4 +1,4 @@
-package sf_schemas
+package schemas
 
 type AccessRelationshipSchema struct {
 	AccessRelationshipID string        `bson:"access_relationship_id" json:"access_relationship_id"`

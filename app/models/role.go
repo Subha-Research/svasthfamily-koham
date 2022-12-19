@@ -1,4 +1,4 @@
-package sf_models
+package models
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"log"
 
 	sf_enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
-	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
+	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -48,7 +48,7 @@ func (rm *RoleModel) InsertAllRoles() error {
 		if doc != nil {
 			continue
 		} else if doc == nil && err == nil {
-			role := &sf_schemas.RoleSchema{
+			role := &schemas.RoleSchema{
 				RoleID:   uuid.NewString(),
 				RoleEnum: i,
 				RoleKey:  role_map[i],
