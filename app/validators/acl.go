@@ -15,15 +15,14 @@ var ExtractTagName = func(fld reflect.StructField) string {
 	if name == "-" {
 		return ""
 	}
-
 	return name
 }
 
 type ACLPostBody struct {
-	ChildMemberAccessList []map[string]interface{} `json:"child_member_access_list" `
-	ParentMemberID        string                   `json:"parent_member_id" `
+	ChildMemberAccessList []map[string]interface{} `json:"child_member_access_list" validate:"gt=0,dive,keys,eq=2,endkeys,required"`
+	ParentMemberID        string                   `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
 	//AccessEnums    []int    `json:"accesses" validate:"required,min=1,dive,number"`
-	RoleEnum int `json:"role" `
+	RoleEnum int `json:"role" validate:"required,number"`
 }
 
 type ACLPutBody struct {

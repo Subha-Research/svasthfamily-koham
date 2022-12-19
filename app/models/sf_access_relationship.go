@@ -1,4 +1,4 @@
-package sf_models
+package models
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/google/uuid"
@@ -20,6 +21,23 @@ type SFAccessRelationshipModel struct {
 }
 
 // func (arm *SFAccessRelationshipModel) CreateSFAccessRelationship(rb validators.ACLPostBody) (bson.M, error) {
+func (arm *SFAccessRelationshipModel) GetSFAccessRelationship(f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+	var result bson.M
+	err := arm.Collection.FindOne(
+		context.TODO(),
+		bson.D{{Key: "parent_family_user_id", Value: f_parent_user_id}, {Key: "child_family_user_id", Value: f_child_user_id}},
+	).Decode(&result)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in
+		// the collection.
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.KohamError("KSE-4007")
+		}
+		return nil, err
+	}
+	fmt.Printf("User ID matched %v", result)
+	return result, nil
+}
 
 func (arm *SFAccessRelationshipModel) InsertAllSFAccessRelationship(f_head_user_id string, rb validators.ACLPostBody) (bson.M, error) {
 	// Colllection variable is set via Dependency injection from app file
@@ -29,6 +47,11 @@ func (arm *SFAccessRelationshipModel) InsertAllSFAccessRelationship(f_head_user_
 		// Check first if the same role already exists
 		// If exist then do not insert that
 		// doc, err := arm.GetRole(i, access_list[i])
+		child_member_id := access_list[i]["child_member_id"].(string)
+		parent_member_id := rb.ParentMemberID
+		if child_member_id == parent_member_id {
+			return nil, errors.KohamError("KSE-4008")
+		}
 
 		log.Println("***** Access list", access_list[i])
 
