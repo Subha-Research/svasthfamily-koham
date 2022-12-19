@@ -20,10 +20,10 @@ var ExtractTagName = func(fld reflect.StructField) string {
 }
 
 type ACLPostBody struct {
-	ChildMemberIDS []string `json:"child_member_ids" validate:"required,min=1,dive,uuid4_rfc4122"`
-	ParentMemberID string   `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
-	AccessEnums    []int    `json:"accesses" validate:"required,min=1,dive,number"`
-	RoleEnum       int      `json:"role" validate:"required,number"`
+	ChildMemberAccessList []map[string]interface{} `json:"child_member_access_list" `
+	ParentMemberID        string                   `json:"parent_member_id" `
+	//AccessEnums    []int    `json:"accesses" validate:"required,min=1,dive,number"`
+	RoleEnum int `json:"role" `
 }
 
 type ACLPutBody struct {
@@ -44,21 +44,22 @@ func (av *ACLValidator) vaidateRole(r_enum int) bool {
 	}
 	return false
 }
-func (av *ACLValidator) validateAccess(a_enums []int) bool {
-	// Run a loop to build freq_hash_map
-	freq_hash_map := map[int]int{}
 
-	for k := range sf_enums.Accesses {
-		freq_hash_map[k] = 1
-	}
+// func (av *ACLValidator) validateAccess(a_enums []int) bool {
+// 	// Run a loop to build freq_hash_map
+// 	freq_hash_map := map[int]int{}
 
-	for i := 0; i < len(a_enums); i++ {
-		if freq_hash_map[a_enums[i]] != 1 {
-			return false
-		}
-	}
-	return true
-}
+// 	for k := range sf_enums.Accesses {
+// 		freq_hash_map[k] = 1
+// 	}
+
+// 	for i := 0; i < len(a_enums); i++ {
+// 		if freq_hash_map[a_enums[i]] != 1 {
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
 
 func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 	validate.RegisterTagNameFunc(ExtractTagName)
@@ -75,14 +76,14 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody) error {
 	// Validate if we support the given role and access received in request
 	// LATER CLEANUP:: validate from service by fetching from cache / database
 	// role := aclpb.RoleEnum
-	access_enums := aclpb.AccessEnums
-	is_all_access_present := av.validateAccess(access_enums)
-	if !is_all_access_present {
-		error_data := map[string]string{
-			"key": "accesses",
-		}
-		return errors.KohamError("KSE-4006", error_data)
-	}
+	// access_enums := aclpb.AccessEnums
+	// is_all_access_present := av.validateAccess(access_enums)
+	// if !is_all_access_present {
+	// 	error_data := map[string]string{
+	// 		"key": "accesses",
+	// 	}
+	// 	return errors.KohamError("KSE-4006", error_data)
+	// }
 
 	role_enum := aclpb.RoleEnum
 	is_role_valid := av.vaidateRole(role_enum)

@@ -33,11 +33,11 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 
 	// Request body validation
 	// CLEANUP:: Access using interface
-	acl_validator := sf_validators.ACLValidator{}
+	/*acl_validator := sf_validators.ACLValidator{}
 	err := acl_validator.ValidateACLPostBody(*aclpb)
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
-	}
+	}*/
 	// Call service
 	acl_s := sf_services.ACLService{}
 	if err := acl_s.CreateSFRelationship(sf_user_id, *aclpb); err != nil {
