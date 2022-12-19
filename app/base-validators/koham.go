@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
+	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -18,8 +19,11 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 	if c.Get("Content-Type") != "application/json" {
 		return errors.KohamError("KSE-4001")
 	}
+	is_validate := c.Params("validate")
 	resource_type := c.Params("resource_type")
-	if resource_type == "tokens" {
+	user_id := c.Params("user_id")
+
+	if resource_type == "tokens" && is_validate == "" {
 
 		log.Println(c.Get("x-service-id"))
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
@@ -31,7 +35,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 		if x_service_id.String() != XServiceID {
 			return errors.KohamError("KSE-4005")
 		}
-	} else if resource_type == "acls" {
+	} else if resource_type == "acls" || (resource_type == "tokens" && is_validate == "validate") {
 		auth := c.Get("Authorization")
 		if auth == "" {
 			return errors.KohamError("KSE-4003")
@@ -41,8 +45,14 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 			return errors.KohamError("KSE-4004")
 		} else {
 			// TRY to decode JWT token
-			return nil
+			// return nil
+			ts := services.TokenService{}
+			err := ts.ParseToken(token[1], user_id)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
+
 }

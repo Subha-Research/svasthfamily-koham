@@ -6,21 +6,21 @@ import (
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 type TokenService struct {
 }
+type MyCustomClaims struct {
+	FUserID string
+	jwt.RegisteredClaims
+}
 
 func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 	mySigningKey := []byte("OUR_SECRET_KEY")
 	token_expiry := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
-
-	type MyCustomClaims struct {
-		FUserID string
-		jwt.RegisteredClaims
-	}
 
 	// Create the claims
 	claims := MyCustomClaims{
@@ -48,4 +48,22 @@ func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 	tm.InsertToken(f_user_id, ss, token_expiry.Time)
 
 	return "", nil
+}
+
+func (ts TokenService) ParseToken(token_string string, user_id string) error {
+	token, err := jwt.ParseWithClaims(token_string, &MyCustomClaims{}, func(*jwt.Token) (secret interface{}, err error) {
+		return []byte("OUR_SECRET_KEY"), nil
+	})
+	if err != nil {
+		return errors.KohamError("KSE-4008")
+	}
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		fmt.Printf("%v %v", claims.FUserID, claims.RegisteredClaims.Issuer)
+		if claims.FUserID != user_id && claims.RegisteredClaims.Issuer == constants.Issuer {
+			return errors.KohamError("KSE-4008")
+		}
+	} else {
+		return errors.KohamError("KSE-4008")
+	}
+	return nil
 }

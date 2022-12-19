@@ -15,4 +15,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4004": {403, "KSE-4004", "Authorization header format is incorrect."},
 	"KSE-4005": {403, "KSE-4005", "You are not authorized to access :resource_type: resource."},
 	"KSE-4006": {400, "KSE-4006", "Invalid value for :key: ."},
+	"KSE-4008": {403, "KSE-4008", "Invalid token"},
 }

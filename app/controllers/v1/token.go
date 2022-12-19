@@ -14,6 +14,9 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 
 func (tc TokenController) Post(c *fiber.Ctx) error {
 	f_user_id := c.Params("user_id")
+	if c.Params("resource_type") == "tokens" && c.Params("resource_type") == "validate" {
+
+	}
 	ts := services.TokenService{}
 	ts.CreateToken(f_user_id)
 
