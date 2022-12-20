@@ -1,6 +1,6 @@
 package enums
 
 var Roles = map[int]string{
-	0: "SF_HEAD",
-	1: "SF_MEMBER",
+	101: "FAMILY_HEAD",
+	102: "FAMILY_MEMBER",
 }

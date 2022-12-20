@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/enums"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 )
@@ -11,7 +12,7 @@ type IACLService interface {
 }
 
 type ACLService struct {
-	ar_model models.SFAccessRelationshipModel
+	ar_model models.AccessRelationshipModel
 }
 
 func (acl_s *ACLService) CreateSFRelationship(f_user_id string, rb validators.ACLPostBody) error {
@@ -25,17 +26,19 @@ func (acl_s *ACLService) CreateSFRelationship(f_user_id string, rb validators.AC
 	}
 	// Dependency injection pattern
 	acl_s.ar_model.Collection = ar_coll
-	_, err_get_doc_head := acl_s.ar_model.GetSFAccessRelationship(f_user_id, f_user_id)
-	if err_get_doc_head != nil {
-		return err_get_doc_head
-	}
-	_, err_get_doc_parent := acl_s.ar_model.GetSFAccessRelationship(rb.ParentMemberID, rb.ParentMemberID)
-	if err_get_doc_parent != nil {
-		return err_get_doc_parent
-	}
-	_, err_get_doc_head_parent := acl_s.ar_model.GetSFAccessRelationship(f_user_id, rb.ParentMemberID)
-	if err_get_doc_head_parent != nil {
-		return err_get_doc_head_parent
+	if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
+		_, err_get_doc_head := acl_s.ar_model.GetSFAccessRelationship(f_user_id, f_user_id)
+		if err_get_doc_head != nil {
+			return err_get_doc_head
+		}
+		_, err_get_doc_parent := acl_s.ar_model.GetSFAccessRelationship(rb.ParentMemberID, rb.ParentMemberID)
+		if err_get_doc_parent != nil {
+			return err_get_doc_parent
+		}
+		_, err_get_doc_head_parent := acl_s.ar_model.GetSFAccessRelationship(f_user_id, rb.ParentMemberID)
+		if err_get_doc_head_parent != nil {
+			return err_get_doc_head_parent
+		}
 	}
 	inserted_doc, err := acl_s.ar_model.InsertAllSFAccessRelationship(f_user_id, rb)
 	if err != nil {

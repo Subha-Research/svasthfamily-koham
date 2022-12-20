@@ -19,7 +19,7 @@ type AccessModel struct {
 	Session    *mongo.Session
 }
 
-func (am *AccessModel) GetAccess(access_enum int, access_key string) (bson.M, error) {
+func (am *AccessModel) GetAccess(access_enum float64, access_key string) (bson.M, error) {
 	var result bson.M
 	err := am.Collection.FindOne(
 		context.TODO(),
@@ -41,17 +41,17 @@ func (am *AccessModel) InsertAllAccesses() error {
 	// Collection variable is set via Dependency injection from app file
 	var access_docs []interface{}
 	access_map := sf_enums.Accesses
-	for i := 0; i < len(access_map); i++ {
+	for k, v := range access_map {
 		// Check first if the same role already exists
 		// If exist then do not insert that
-		doc, err := am.GetAccess(i, access_map[i])
+		doc, err := am.GetAccess(k, v)
 		if doc != nil {
 			continue
 		} else if doc == nil && err == nil {
 			role := &sf_schemas.Access{
 				AccessID:   uuid.NewString(),
-				AccessEnum: i,
-				AccessKey:  access_map[i],
+				AccessEnum: k,
+				AccessKey:  v,
 				IsActive:   true,
 				IsDelete:   false,
 			}

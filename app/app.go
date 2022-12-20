@@ -3,15 +3,15 @@ package app
 import (
 	"log"
 
-	sf_models "github.com/Subha-Research/svasthfamily-koham/app/models"
+	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	routes "github.com/Subha-Research/svasthfamily-koham/app/routes/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type KohamApp struct {
-	role_model   sf_models.RoleModel
-	access_model sf_models.AccessModel
+	role_model   models.RoleModel
+	access_model models.AccessModel
 }
 
 func (k_app *KohamApp) SetupApp() *fiber.App {
@@ -19,7 +19,7 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 	app.Use(logger.New())
 	routes.SetupPingRoute(app)
 
-	database := sf_models.Database{}
+	database := models.Database{}
 	role_coll, _, err := database.GetCollectionAndSession("sf_roles")
 	if err != nil {
 		log.Fatal("Errro in  getting collection and session. Stopping server", err)
