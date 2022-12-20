@@ -15,13 +15,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type SFAccessRelationshipModel struct {
+type AccessRelationshipModel struct {
 	Collection *mongo.Collection
 	Session    *mongo.Session
 }
 
-// func (arm *SFAccessRelationshipModel) CreateSFAccessRelationship(rb validators.ACLPostBody) (bson.M, error) {
-func (arm *SFAccessRelationshipModel) GetSFAccessRelationship(f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+func (arm *AccessRelationshipModel) GetSFAccessRelationship(f_parent_user_id string, f_child_user_id string) (bson.M, error) {
 	var result bson.M
 	err := arm.Collection.FindOne(
 		context.TODO(),
@@ -39,22 +38,11 @@ func (arm *SFAccessRelationshipModel) GetSFAccessRelationship(f_parent_user_id s
 	return result, nil
 }
 
-func (arm *SFAccessRelationshipModel) InsertAllSFAccessRelationship(f_head_user_id string, rb validators.ACLPostBody) (bson.M, error) {
+func (arm *AccessRelationshipModel) InsertAllSFAccessRelationship(f_head_user_id string, rb validators.ACLPostBody) (bson.M, error) {
 	// Colllection variable is set via Dependency injection from app file
 	var access_list_docs []interface{}
 	access_list := rb.ChildMemberAccessList
 	for i := 0; i < len(access_list); i++ {
-		// Check first if the same role already exists
-		// If exist then do not insert that
-		// doc, err := arm.GetRole(i, access_list[i])
-		child_member_id := access_list[i]["child_member_id"].(string)
-		parent_member_id := rb.ParentMemberID
-		if child_member_id == parent_member_id {
-			return nil, errors.KohamError("KSE-4008")
-		}
-
-		log.Println("***** Access list", access_list[i])
-
 		access_relation := &sf_schemas.AccessRelationshipSchema{
 			AccessRelationshipID: uuid.NewString(),
 			ChildFamilyUserID:    access_list[i]["child_member_id"].(string),

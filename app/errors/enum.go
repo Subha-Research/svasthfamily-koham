@@ -16,5 +16,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4005": {403, "KSE-4005", "You are not authorized to access :resource_type: resource."},
 	"KSE-4006": {400, "KSE-4006", "Invalid value for :key: ."},
 	"KSE-4007": {400, "KSE-4007", "User ID didn't matched."},
-	"KSE-4008": {400, "KSE-4008", "Child member ID can't be same as Parent member ID"},
+	"KSE-4008": {400, "KSE-4008", "Child member id can't be same as parent member id"},
 }

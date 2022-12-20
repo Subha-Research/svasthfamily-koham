@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	sf_enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
+	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
 	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 
 	"github.com/google/uuid"
@@ -40,18 +40,18 @@ func (rm *RoleModel) GetRole(role_enum int, role_key string) (bson.M, error) {
 func (rm *RoleModel) InsertAllRoles() error {
 	// Colllection variable is set via Dependency injection from app file
 	var role_docs []interface{}
-	role_map := sf_enums.Roles
-	for i := 0; i < len(role_map); i++ {
+	role_map := enums.Roles
+	for k, v := range role_map {
 		// Check first if the same role already exists
 		// If exist then do not insert that
-		doc, err := rm.GetRole(i, role_map[i])
+		doc, err := rm.GetRole(k, v)
 		if doc != nil {
 			continue
 		} else if doc == nil && err == nil {
 			role := &schemas.RoleSchema{
 				RoleID:   uuid.NewString(),
-				RoleEnum: i,
-				RoleKey:  role_map[i],
+				RoleEnum: k,
+				RoleKey:  v,
 				IsActive: true,
 				IsDelete: false,
 			}
