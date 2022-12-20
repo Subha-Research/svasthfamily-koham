@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
@@ -13,12 +12,24 @@ import (
 
 type TokenService struct {
 }
+
 type MyCustomClaims struct {
 	FUserID string
 	jwt.RegisteredClaims
 }
 
 func (ts TokenService) CreateToken(f_user_id string) (string, error) {
+	arm := models.AccessRelationshipModel{}
+	database := models.Database{}
+	ar_coll, _, err := database.GetCollectionAndSession("sf_access_relationship")
+	if err != nil {
+		return "", err
+	}
+	arm.Collection = ar_coll
+	_, err := arm.GetAllAccessRelationship(f_user_id)
+	if err != nil {
+		return "", err
+	}
 	mySigningKey := []byte("OUR_SECRET_KEY")
 	token_expiry := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 
@@ -38,10 +49,9 @@ func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 	fmt.Printf("%v %v", ss, err)
 
 	tm := models.TokenModel{}
-	database := models.Database{}
+	// database := models.Database{}
 	token_coll, _, err := database.GetCollectionAndSession("sf_tokens")
 	if err != nil {
-		log.Println("Errro in  getting collection and session. Stopping server", err)
 		return "", err
 	}
 	tm.Collection = token_coll
