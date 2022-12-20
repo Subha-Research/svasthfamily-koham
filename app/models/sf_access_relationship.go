@@ -20,6 +20,25 @@ type AccessRelationshipModel struct {
 	Session    *mongo.Session
 }
 
+func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) ([]bson.M, error) {
+	var results []bson.M
+	cursor, err := arm.Collection.Find(context.TODO(), bson.D{{Key: "parent_family_user_id", Value: f_user_id}})
+	if err != nil {
+		log.Println("Error while getting all acess relationship", err)
+		return nil, errors.KohamError("KSE-5001")
+	}
+
+	// Get a list of all returned documents and print them out.
+	// See the mongo.Cursor documentation for more examples of using cursors.
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		log.Fatal(err)
+	}
+	for _, result := range results {
+		fmt.Println(result)
+	}
+	return results, nil
+}
+
 func (arm *AccessRelationshipModel) GetSFAccessRelationship(f_parent_user_id string, f_child_user_id string) (bson.M, error) {
 	var result bson.M
 	err := arm.Collection.FindOne(
