@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
-	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
+	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,13 +62,13 @@ func (arm *AccessRelationshipModel) InsertAllSFAccessRelationship(f_head_user_id
 	var access_list_docs []interface{}
 	access_list := rb.ChildMemberAccessList
 	for i := 0; i < len(access_list); i++ {
-		access_relation := &sf_schemas.AccessRelationshipSchema{
+		access_relation := &schemas.AccessRelationshipSchema{
 			AccessRelationshipID: uuid.NewString(),
 			ChildFamilyUserID:    access_list[i]["child_member_id"].(string),
 			ParentFamilyUserID:   rb.ParentMemberID,
 			AccessEnum:           access_list[i]["access_enums"].([]interface{}),
 			IsDelete:             false,
-			Audit: sf_schemas.AuditSchema{
+			Audit: schemas.AuditSchema{
 				CreatedAt: time.Now(),
 				CreatedBy: f_head_user_id,
 				UpdatedAt: time.Now(),
