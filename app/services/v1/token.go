@@ -26,10 +26,10 @@ func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 		return "", err
 	}
 	arm.Collection = ar_coll
-	_, err := arm.GetAllAccessRelationship(f_user_id)
-	if err != nil {
-		return "", err
-	}
+	// _, err := arm.GetAllAccessRelationship(f_user_id)
+	// if err != nil {
+	// 	return "", err
+	// }
 	mySigningKey := []byte("OUR_SECRET_KEY")
 	token_expiry := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 
