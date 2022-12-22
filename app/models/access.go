@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	sf_enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
-	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
+	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
+	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -40,7 +40,7 @@ func (am *AccessModel) GetAccess(access_enum float64, access_key string) (bson.M
 func (am *AccessModel) InsertAllAccesses() error {
 	// Collection variable is set via Dependency injection from app file
 	var access_docs []interface{}
-	access_map := sf_enums.Accesses
+	access_map := enums.Accesses
 	for k, v := range access_map {
 		// Check first if the same role already exists
 		// If exist then do not insert that
@@ -48,7 +48,7 @@ func (am *AccessModel) InsertAllAccesses() error {
 		if doc != nil {
 			continue
 		} else if doc == nil && err == nil {
-			role := &sf_schemas.Access{
+			role := &schemas.Access{
 				AccessID:   uuid.NewString(),
 				AccessEnum: k,
 				AccessKey:  v,

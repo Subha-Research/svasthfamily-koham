@@ -15,7 +15,7 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 func (tc TokenController) Post(c *fiber.Ctx) error {
 	f_user_id := c.Params("user_id")
 	if c.Params("resource_type") == "tokens" && c.Params("resource_type") == "validate" {
-
+		// TODO:: Complete this method
 	}
 	ts := services.TokenService{}
 	ts.CreateToken(f_user_id)
@@ -34,6 +34,7 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 	// 	return errors.DefaultErrorHandler(c, err)
 	// }
 
+	// TODO:: Update return to return json that will contain token key and expiry
 	return c.Status(fiber.StatusCreated).SendString("Token creation successful")
 }
 

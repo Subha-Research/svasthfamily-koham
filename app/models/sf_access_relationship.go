@@ -24,18 +24,19 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 	var results []bson.M
 	cursor, err := arm.Collection.Find(context.TODO(), bson.D{{Key: "parent_family_user_id", Value: f_user_id}})
 	if err != nil {
-		log.Println("Error while getting all acess relationship", err)
+		log.Println("Error while getting all access relationship", err)
 		return nil, errors.KohamError("KSE-5001")
 	}
 
 	// Get a list of all returned documents and print them out.
 	// See the mongo.Cursor documentation for more examples of using cursors.
 	if err = cursor.All(context.TODO(), &results); err != nil {
-		log.Fatal(err)
+		log.Println("Error while getting all access relationship", err)
+		return nil, errors.KohamError("KSE-5001")
 	}
-	for _, result := range results {
-		fmt.Println(result)
-	}
+	// for _, result := range results {
+	// 	fmt.Println(result)
+	// }
 	return results, nil
 }
 
