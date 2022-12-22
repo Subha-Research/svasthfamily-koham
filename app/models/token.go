@@ -17,6 +17,10 @@ type TokenModel struct {
 }
 
 func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Time) error {
+	type ReturnData struct {
+		TokenKey    string
+		TokenExpiry time.Time
+	}
 
 	as := &schemas.AuditSchema{
 		CreatedAt: time.Now(),
@@ -37,6 +41,6 @@ func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Ti
 		log.Fatal(err)
 	}
 	fmt.Printf("inserted document with ID %v\n", res.InsertedID)
-
+	// TODO:: Update ReturnData to return
 	return nil
 }
