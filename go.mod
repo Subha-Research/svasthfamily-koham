@@ -7,7 +7,6 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-rc.2
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/golang-jwt/jwt/v4 v4.4.3
-	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/google/uuid v1.3.0
 	github.com/knadh/koanf v1.4.4
 	github.com/stretchr/testify v1.8.1
