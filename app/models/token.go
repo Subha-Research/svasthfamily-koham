@@ -2,10 +2,11 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,14 +15,10 @@ import (
 type TokenModel struct {
 	Collection *mongo.Collection
 	Session    *mongo.Session
+	// InsertReturn dto.CreateTokenResponse
 }
 
-func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Time) error {
-	type ReturnData struct {
-		TokenKey    string
-		TokenExpiry time.Time
-	}
-
+func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Time) (*dto.CreateTokenResponse, error) {
 	as := &schemas.AuditSchema{
 		CreatedAt: time.Now(),
 		CreatedBy: f_user_id,
@@ -38,9 +35,14 @@ func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Ti
 
 	res, err := tm.Collection.InsertOne(context.TODO(), ts)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error while inserting token... returning internal server error", err)
+		return nil, errors.KohamError("KSE-5001")
 	}
-	fmt.Printf("inserted document with ID %v\n", res.InsertedID)
-	// TODO:: Update ReturnData to return
-	return nil
+	log.Println("Inserted token document with ID", res.InsertedID)
+	// Build response data
+	ctr := dto.CreateTokenResponse{}
+	ctr.TokenKey = token
+	ctr.TokenExpiry = expiry
+	ctr.FamilyUserID = f_user_id
+	return &ctr, nil
 }

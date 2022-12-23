@@ -19,4 +19,7 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4007": {400, "KSE-4007", "User ID didn't matched."},
 	"KSE-4008": {400, "KSE-4008", "Child member id can't be same as parent member id"},
 	"KSE-4009": {403, "KSE-4009", "Invalid token"},
+
+	// All 200 series errors
+	"KSE-2004": {204, "KSE-2004", "No access relationship found for family user id :id:"},
 }

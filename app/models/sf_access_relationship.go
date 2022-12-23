@@ -34,9 +34,9 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 		log.Println("Error while getting all access relationship", err)
 		return nil, errors.KohamError("KSE-5001")
 	}
-	// for _, result := range results {
-	// 	fmt.Println(result)
-	// }
+	if len(results) == 0 {
+		return nil, errors.KohamError("KSE-2004")
+	}
 	return results, nil
 }
 

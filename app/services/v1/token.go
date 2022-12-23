@@ -16,11 +16,11 @@ type TokenService struct {
 
 type TokenClaims struct {
 	FUserID    string
-	AccessList dto.AccessRelationshipDTO
+	AccessList []dto.AccessRelation
 	jwt.RegisteredClaims
 }
 
-func (ts TokenService) CreateToken(f_user_id string) (string, error) {
+func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
@@ -35,15 +35,18 @@ func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 
 	ar_coll, _, err := database.GetCollectionAndSession("sf_access_relationship")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	arm.Collection = ar_coll
 	all_access_relations, err := arm.GetAllAccessRelationship(f_user_id)
+	if err != nil {
+		return nil, err
+	}
 	dto := dto.AccessRelationshipDTO{}
 	acl_dto, err := dto.FormatAllAccessRelationship(all_access_relations)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Create the claims
@@ -65,13 +68,14 @@ func (ts TokenService) CreateToken(f_user_id string) (string, error) {
 
 	token_coll, _, err := database.GetCollectionAndSession("sf_tokens")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	tm.Collection = token_coll
-	tm.InsertToken(f_user_id, ss, token_expiry.Time)
-
-	// TODO:: Return token key with expiry struct
-	return "", nil
+	data, insert_err := tm.InsertToken(f_user_id, ss, token_expiry.Time)
+	if insert_err != nil {
+		return nil, insert_err
+	}
+	return data, nil
 }
 
 func (ts TokenService) ParseToken(token_string string, f_user_id string) error {

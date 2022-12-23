@@ -18,24 +18,13 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 		// TODO:: Complete this method
 	}
 	ts := services.TokenService{}
-	ts.CreateToken(f_user_id)
-
-	// tpb := new(validators.TokenPostBody)
-	// if err := c.BodyParser(tpb); err != nil {
-	// 	// If any error in body parsing
-	// 	return errors.DefaultErrorHandler(c,
-	// 		fiber.NewError(fiber.StatusBadRequest, "Body parsing failed."))
-	// }
-
-	// // Request body validation
-	// tokenValidator := validators.TokenValidator{}
-	// err := tokenValidator.ValidatePostBody(*tpb)
-	// if err != nil {
-	// 	return errors.DefaultErrorHandler(c, err)
-	// }
+	response, err := ts.CreateToken(f_user_id)
+	if err != nil {
+		return err
+	}
 
 	// TODO:: Update return to return json that will contain token key and expiry
-	return c.Status(fiber.StatusCreated).SendString("Token creation successful")
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (tc TokenController) Put(c *fiber.Ctx) error {
