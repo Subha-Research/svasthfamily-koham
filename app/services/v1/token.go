@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/cache"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/dto"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
@@ -31,7 +32,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 
 	// TODO:: Move this to constants
 	signing_key := []byte("OUR_SECRET_KEY")
-	token_expiry := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
+	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
 
 	ar_coll, _, err := database.GetCollectionAndSession("sf_access_relationship")
 	if err != nil {
@@ -75,6 +76,13 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	if insert_err != nil {
 		return nil, insert_err
 	}
+	// Cache call
+	// Dependency injection pattern
+	r := cache.Redis{}
+	redis_client := r.SetupTokenRedisDB()
+	tc := cache.TokenCache{}
+	tc.RedisClient = &redis_client
+	tc.Set(f_user_id, data.TokenKey, constants.TokenExpiryTTL)
 	return data, nil
 }
 
@@ -88,7 +96,7 @@ func (ts TokenService) ParseToken(token_string string, f_user_id string) error {
 	}
 	if claims, ok := token.Claims.(*TokenClaims); ok && token.Valid {
 		// TODO:: Use log instead of fmt
-		fmt.Printf("%v %v", claims.FUserID, claims.RegisteredClaims.Issuer)
+		// fmt.Printf("%v %v", claims.FUserID, claims.RegisteredClaims.Issuer)
 		if claims.FUserID != f_user_id && claims.RegisteredClaims.Issuer == constants.Issuer {
 			return errors.KohamError("KSE-4009")
 		}

@@ -54,5 +54,4 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 		}
 	}
 	return nil
-
 }
