@@ -21,11 +21,16 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (ts TokenService) GetToken(f_user_id string) error {
+	// TODO:: call cache to check if token is present there
+	// TODO:: if not found in cache, check DB
+	return nil
+}
+
 func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
-
 	arm := models.AccessRelationshipModel{}
 	database := models.Database{}
 	tm := models.TokenModel{}
