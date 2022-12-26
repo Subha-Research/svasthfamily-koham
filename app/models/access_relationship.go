@@ -43,6 +43,13 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	var access_list_docs []interface{}
 	access_list := rb.AccessList
 	for i := 0; i < len(access_list); i++ {
+		doc, _ := arm.GetAccessRelationship(access_list[i].ChildMemberId, rb.ParentMemberID)
+		if doc != nil {
+			return doc, errors.KohamError("KSE-4009")
+		}
+		// if err_get_doc_child_parent != nil {
+		// 	return nil, err_get_doc_child_parent
+		// }
 		access_relation := &sf_schemas.AccessRelationshipSchema{
 			AccessRelationshipID: uuid.NewString(),
 			ChildFamilyUserID:    access_list[i].ChildMemberId,
@@ -72,33 +79,29 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	return nil, nil
 }
 
-func (arm *AccessRelationshipModel) UpdateAllAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
+func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
 	// Colllection variable is set via Dependency injection from app file
-	var access_list_docs []interface{}
+
 	access_list := rb.Access
 
-	access_relation := &sf_schemas.AccessRelationshipSchema{
-		AccessRelationshipID: uuid.NewString(),
-		ChildFamilyUserID:    access_list.ChildMemberId,
-		ParentFamilyUserID:   rb.ParentMemberID,
-		AccessEnum:           access_list.AccessEnums,
-		IsDelete:             false,
-		Audit: sf_schemas.AuditSchema{
-			UpdatedAt: time.Now(),
-			UpdatedBy: f_head_user_id,
-		},
-	}
-	access_list_docs = append(access_list_docs, access_relation)
-	// Call update one of mongo
-	//need to modify with update one
-	if len(access_list_docs) > 0 {
-		opts := options.InsertMany().SetOrdered(false)
-		res, err := arm.Collection.InsertMany(context.TODO(), access_list_docs, opts)
-		if err != nil {
-			log.Println("Error in inserting access relation", err)
+	access_relation := access_list.AccessEnums
+
+	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildMemberId}, {Key: "parent_family_user_id", Value: rb.ParentMemberID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation}, {Key: "audit.updated_at", Value: time.Now()}, {Key: "audit.updated_by", Value: f_head_user_id}}}}
+	var updatedDocument bson.M
+	err := arm.Collection.FindOneAndUpdate(
+		context.TODO(),
+		filter,
+		update,
+	).Decode(&updatedDocument)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in
+		// the collection.
+		if err == mongo.ErrNoDocuments {
 			return nil, err
 		}
-		fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
+		log.Fatal(err)
 	}
-	return nil, nil
+	log.Println("updated document", updatedDocument)
+	return updatedDocument, nil
 }

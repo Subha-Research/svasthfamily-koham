@@ -17,4 +17,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4006": {400, "KSE-4006", "Invalid value for :key: ."},
 	"KSE-4007": {400, "KSE-4007", "User ID didn't matched."},
 	"KSE-4008": {400, "KSE-4008", "Child member id can't be same as parent member id"},
+	"KSE-4009": {400, "KSE-4009", "Access Relationship already exist for the mentioned Child-Parent pair"},
 }

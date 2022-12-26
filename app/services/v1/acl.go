@@ -48,7 +48,7 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, rb validator
 	return nil
 }
 
-func (acl_s *ACLService) UpdateAccessRelationship(rb validators.ACLPutBody) error {
+func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) error {
 	database := models.Database{}
 	ar_coll, _, err := database.GetCollectionAndSession("access_relationship")
 	if err != nil {
@@ -56,7 +56,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(rb validators.ACLPutBody) erro
 	}
 	// Dependency injection pattern
 	acl_s.ar_model.Collection = ar_coll
-	_, err_get_doc_child_parent := acl_s.ar_model.GetAccessRelationship(rb.Access.ChildMemberId, rb.ParentMemberID)
+	_, err_get_doc_child_parent := acl_s.ar_model.UpdateAccessRelationship(f_head_user_id, rb)
 	if err_get_doc_child_parent != nil {
 		return err_get_doc_child_parent
 	}
