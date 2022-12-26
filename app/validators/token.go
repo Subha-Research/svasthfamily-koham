@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/Subha-Research/svasthfamily-koham/app/enums"
 )
 
 type TokenPostBody struct {
@@ -10,8 +10,21 @@ type TokenPostBody struct {
 
 type TokenValidator struct {
 }
+type TokenRequestBody struct {
+	Childmember_id string  `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
+	AccessEnum     float64 `json:"role" validate:"required,number"`
+}
 
-func (tv *TokenValidator) ValidatePostBody(tpb TokenPostBody) *fiber.Error {
+func (tv *TokenValidator) ValidateTokenRequestbody(child_member_id string, acessnumberreceived float64) error {
+	d := enums.Accesses
+
+	for k := range d {
+
+		if k == acessnumberreceived {
+
+		}
+	}
+
 	// var validate = validator.New()
 	// err := validate.Struct(tpb)
 

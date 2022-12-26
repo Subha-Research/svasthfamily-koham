@@ -24,7 +24,6 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) error {
 	user_id := c.Params("user_id")
 
 	if resource_type == "tokens" && is_validate == "" {
-
 		log.Println(c.Get("x-service-id"))
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {

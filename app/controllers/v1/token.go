@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,6 +17,13 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 func (tc TokenController) Post(c *fiber.Ctx) error {
 	f_user_id := c.Params("user_id")
 	if c.Params("resource_type") == "tokens" && c.Params("resource_type") == "validate" {
+
+		tokenrb := new(validators.TokenRequestBody)
+		if err := c.BodyParser(tokenrb); err != nil {
+			// If any error in body parsing of fiber
+			// So we return fiber error
+			return errors.DefaultErrorHandler(c, fiber.NewError(400, "Body Parsing failed"))
+		}
 		// TODO:: Complete this method
 	}
 	ts := services.TokenService{}
