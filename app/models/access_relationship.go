@@ -89,7 +89,8 @@ func (arm *AccessRelationshipModel) UpdateAllAccessRelationship(f_head_user_id s
 		},
 	}
 	access_list_docs = append(access_list_docs, access_relation)
-	// Call insert many of mongo
+	// Call update one of mongo
+	//need to modify with update one
 	if len(access_list_docs) > 0 {
 		opts := options.InsertMany().SetOrdered(false)
 		res, err := arm.Collection.InsertMany(context.TODO(), access_list_docs, opts)
