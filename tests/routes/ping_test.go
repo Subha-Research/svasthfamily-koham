@@ -27,7 +27,9 @@ func TestPingRoute(t *testing.T) {
 		},
 	}
 
-	app := app.KohamApp{}
+	app := &app.KohamApp{
+		App: app.InitFiberApplication(),
+	}
 	koham_app := app.SetupApp()
 	// Iterate through testcases
 	for _, test := range tests {

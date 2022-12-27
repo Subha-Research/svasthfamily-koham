@@ -9,10 +9,11 @@ import (
 )
 
 type IACLService interface {
+	CreateSFRelationship(string, validators.ACLPostBody) error
 }
 
 type ACLService struct {
-	ar_model models.AccessRelationshipModel
+	ARModel models.AccessRelationshipModel
 }
 
 func (acl_s *ACLService) CreateSFRelationship(f_user_id string, rb validators.ACLPostBody) error {
@@ -25,22 +26,22 @@ func (acl_s *ACLService) CreateSFRelationship(f_user_id string, rb validators.AC
 		log.Fatal("Errro in  getting collection and session. Stopping server", err)
 	}
 	// Dependency injection pattern
-	acl_s.ar_model.Collection = ar_coll
+	acl_s.ARModel.Collection = ar_coll
 	if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
-		_, err_get_doc_head := acl_s.ar_model.GetSFAccessRelationship(f_user_id, f_user_id)
+		_, err_get_doc_head := acl_s.ARModel.GetSFAccessRelationship(f_user_id, f_user_id)
 		if err_get_doc_head != nil {
 			return err_get_doc_head
 		}
-		_, err_get_doc_parent := acl_s.ar_model.GetSFAccessRelationship(rb.ParentMemberID, rb.ParentMemberID)
+		_, err_get_doc_parent := acl_s.ARModel.GetSFAccessRelationship(rb.ParentMemberID, rb.ParentMemberID)
 		if err_get_doc_parent != nil {
 			return err_get_doc_parent
 		}
-		_, err_get_doc_head_parent := acl_s.ar_model.GetSFAccessRelationship(f_user_id, rb.ParentMemberID)
+		_, err_get_doc_head_parent := acl_s.ARModel.GetSFAccessRelationship(f_user_id, rb.ParentMemberID)
 		if err_get_doc_head_parent != nil {
 			return err_get_doc_head_parent
 		}
 	}
-	inserted_doc, err := acl_s.ar_model.InsertAllSFAccessRelationship(f_user_id, rb)
+	inserted_doc, err := acl_s.ARModel.InsertAllSFAccessRelationship(f_user_id, rb)
 	if err != nil {
 		return err
 	}
