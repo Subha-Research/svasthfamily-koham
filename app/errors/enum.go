@@ -15,11 +15,12 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4004": {403, "KSE-4004", "Authorization header format is incorrect."},
 	"KSE-4005": {403, "KSE-4005", "You are not authorized to access :resource_type: resource."},
 	"KSE-4006": {400, "KSE-4006", "Invalid value for :key: ."},
+	"KSE-4010": {404, "KSE-4010", "No token found for family user id :id:"},
 
 	"KSE-4007": {400, "KSE-4007", "User ID didn't matched."},
 	"KSE-4008": {400, "KSE-4008", "Child member id can't be same as parent member id"},
 	"KSE-4009": {403, "KSE-4009", "Invalid token"},
 
 	// All 200 series errors
-	"KSE-2004": {204, "KSE-2004", "No access relationship found for family user id :id:"},
+	"KSE-2004": {404, "KSE-2004", "No access relationship found for family user id :id:"},
 }

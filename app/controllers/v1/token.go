@@ -15,21 +15,35 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 }
 
 func (tc TokenController) Post(c *fiber.Ctx) error {
+	token := c.Locals("token").(*string)
 	f_user_id := c.Params("user_id")
-	if c.Params("resource_type") == "tokens" && c.Params("resource_type") == "validate" {
+	ts := services.TokenService{}
+	if c.Params("validate") == "validate" {
 
 		tokenrb := new(validators.TokenRequestBody)
-		if err := c.BodyParser(tokenrb); err != nil {
+		err := c.BodyParser(tokenrb)
+		if err != nil {
 			// If any error in body parsing of fiber
 			// So we return fiber error
 			return errors.DefaultErrorHandler(c, fiber.NewError(400, "Body Parsing failed"))
 		}
+		tv := validators.TokenValidator{}
+		err_rb := tv.ValidateTokenRequestbody(*tokenrb)
+		if err_rb != nil {
+			// TODO:: Make koham error
+			return err_rb
+		}
 		// TODO:: Complete this method
+		response, err := ts.ValidateTokenAccess(token, f_user_id, *tokenrb)
+		if err != nil {
+			return err
+		}
+		return c.Status(fiber.StatusOK).JSON(response)
 	}
-	ts := services.TokenService{}
+
 	response, err := ts.CreateToken(f_user_id)
 	if err != nil {
-		return err
+		return errors.DefaultErrorHandler(c, err)
 	}
 
 	// TODO:: Update return to return json that will contain token key and expiry

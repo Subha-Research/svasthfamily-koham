@@ -18,10 +18,12 @@ func SetupRoutes(app *fiber.App) {
 	v1.Use("/", func(c *fiber.Ctx) error {
 		// Validate headers if headers has required keys or not.
 		bv := base_validators.BaseValidator{}
-		err := bv.ValidateHeaders(c)
+		token, err := bv.ValidateHeaders(c)
+
 		if err != nil {
 			return errors.DefaultErrorHandler(c, err)
 		}
+		c.Locals("token", token)
 		return c.Next()
 	})
 	v1.Get("/", bc.GetHandler)
