@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -42,15 +43,13 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	// Colllection variable is set via Dependency injection from app file
 	var access_list_docs []interface{}
 	access_list := rb.AccessList
+	default_child_access := []float64{102, 103, 105, 106, 107, 106, 108}
 	for i := 0; i < len(access_list); i++ {
-		doc, _ := arm.GetAccessRelationship(access_list[i].ChildMemberId, rb.ParentMemberID)
+		doc, _ := arm.GetAccessRelationship(rb.ParentMemberID, access_list[i].ChildMemberId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
 		}
-		// if err_get_doc_child_parent != nil {
-		// 	return nil, err_get_doc_child_parent
-		// }
-		access_relation := &sf_schemas.AccessRelationshipSchema{
+		child_parent_access_relation := &sf_schemas.AccessRelationshipSchema{
 			AccessRelationshipID: uuid.NewString(),
 			ChildFamilyUserID:    access_list[i].ChildMemberId,
 			ParentFamilyUserID:   rb.ParentMemberID,
@@ -63,7 +62,23 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 				UpdatedBy: f_head_user_id,
 			},
 		}
-		access_list_docs = append(access_list_docs, access_relation)
+		if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
+			child_child_access_relation := &sf_schemas.AccessRelationshipSchema{
+				AccessRelationshipID: uuid.NewString(),
+				ChildFamilyUserID:    access_list[i].ChildMemberId,
+				ParentFamilyUserID:   access_list[i].ChildMemberId,
+				AccessEnum:           default_child_access,
+				IsDelete:             false,
+				Audit: sf_schemas.AuditSchema{
+					CreatedAt: time.Now(),
+					CreatedBy: f_head_user_id,
+					UpdatedAt: time.Now(),
+					UpdatedBy: f_head_user_id,
+				},
+			}
+			access_list_docs = append(access_list_docs, child_child_access_relation)
+		}
+		access_list_docs = append(access_list_docs, child_parent_access_relation)
 	}
 
 	// Call insert many of mongo
@@ -81,9 +96,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 
 func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
 	// Colllection variable is set via Dependency injection from app file
-
 	access_list := rb.Access
-
 	access_relation := access_list.AccessEnums
 
 	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildMemberId}, {Key: "parent_family_user_id", Value: rb.ParentMemberID}}
