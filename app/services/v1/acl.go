@@ -16,9 +16,6 @@ type ACLService struct {
 }
 
 func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, rb validators.ACLPostBody) error {
-	// 1. Check if this sf_user_id exist or not in family_relationship collection.
-	// 2. Check if given role and access is supported by us
-	// 3.
 	database := models.Database{}
 	ar_coll, _, err := database.GetCollectionAndSession("access_relationship")
 	if err != nil {
@@ -56,9 +53,9 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb vali
 	}
 	// Dependency injection pattern
 	acl_s.ar_model.Collection = ar_coll
-	_, err_get_doc_child_parent := acl_s.ar_model.UpdateAccessRelationship(f_head_user_id, rb)
-	if err_get_doc_child_parent != nil {
-		return err_get_doc_child_parent
+	_, err_update_doc := acl_s.ar_model.UpdateAccessRelationship(f_head_user_id, rb)
+	if err_update_doc != nil {
+		return err_update_doc
 	}
 
 	return nil
