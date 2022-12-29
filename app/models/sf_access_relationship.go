@@ -38,7 +38,7 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 		error_data := map[string]string{
 			"id": f_user_id,
 		}
-		return nil, errors.KohamError("KSE-2004", error_data)
+		return nil, errors.KohamError("KSE-4012", error_data)
 	}
 	return results, nil
 }

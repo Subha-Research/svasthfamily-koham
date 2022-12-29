@@ -28,5 +28,6 @@ func SetupRoutes(app *fiber.App) {
 	})
 	v1.Get("/", bc.GetHandler)
 	v1.Post("/", bc.PostHandler)
+	v1.Put("/", bc.PutHandler)
 	v1.Delete("/", bc.DeleteHandler)
 }

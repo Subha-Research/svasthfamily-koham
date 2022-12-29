@@ -20,7 +20,7 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 	routes.SetupPingRoute(app)
 
 	database := models.Database{}
-	role_coll, _, err := database.GetCollectionAndSession("sf_roles")
+	role_coll, _, err := database.GetCollectionAndSession("roles")
 	if err != nil {
 		log.Fatal("Errro in  getting collection and session. Stopping server", err)
 	}
@@ -28,7 +28,7 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 	k_app.role_model.Collection = role_coll
 	k_app.role_model.InsertAllRoles()
 
-	access_coll, _, err := database.GetCollectionAndSession("sf_accesses")
+	access_coll, _, err := database.GetCollectionAndSession("accesses")
 	if err != nil {
 		log.Fatal("Error in  getting collection and session. Stopping server", err)
 	}
