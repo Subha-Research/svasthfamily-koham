@@ -19,7 +19,6 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 	f_user_id := c.Params("user_id")
 	ts := services.TokenService{}
 	if c.Params("validate") == "validate" {
-
 		tokenrb := new(validators.TokenRequestBody)
 		err := c.BodyParser(tokenrb)
 		if err != nil {
@@ -33,7 +32,6 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 			// TODO:: Make koham error
 			return err_rb
 		}
-		// TODO:: Complete this method
 		response, err := ts.ValidateTokenAccess(token, f_user_id, *tokenrb)
 		if err != nil {
 			return err
@@ -45,8 +43,6 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
-
-	// TODO:: Update return to return json that will contain token key and expiry
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
@@ -55,5 +51,6 @@ func (tc TokenController) Put(c *fiber.Ctx) error {
 }
 
 func (tc TokenController) Delete(c *fiber.Ctx) error {
+	// TODO:: Call service delete
 	return c.Status(fiber.StatusCreated).SendString("Token DELETE called")
 }
