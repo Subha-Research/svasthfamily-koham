@@ -49,5 +49,14 @@ func (bc BaseController) PutHandler(c *fiber.Ctx) error {
 }
 
 func (bc BaseController) DeleteHandler(c *fiber.Ctx) error {
-	return nil
+	resource_type := c.Params("resource_type")
+
+	// CLEANUPS:: Remove hardcoded values
+	if resource_type == "tokens" {
+		return interfaces.IRequest.Delete(TokenController{}, c)
+	} else if resource_type == "acls" {
+		return interfaces.IRequest.Delete(ACLController{}, c)
+	} else {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
+	}
 }

@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
+	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -12,23 +15,39 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 }
 
 func (tc TokenController) Post(c *fiber.Ctx) error {
-	// f_user_id := c.Params("user_id")
+	token := c.Locals("token").(*string)
+	f_user_id := c.Params("user_id")
+	ts := services.TokenService{}
+	if c.Params("validate") == "validate" {
 
-	// tpb := new(validators.TokenPostBody)
-	// if err := c.BodyParser(tpb); err != nil {
-	// 	// If any error in body parsing
-	// 	return errors.DefaultErrorHandler(c,
-	// 		fiber.NewError(fiber.StatusBadRequest, "Body parsing failed."))
-	// }
+		tokenrb := new(validators.TokenRequestBody)
+		err := c.BodyParser(tokenrb)
+		if err != nil {
+			// If any error in body parsing of fiber
+			// So we return fiber error
+			return errors.DefaultErrorHandler(c, fiber.NewError(400, "Body Parsing failed"))
+		}
+		tv := validators.TokenValidator{}
+		err_rb := tv.ValidateTokenRequestbody(*tokenrb)
+		if err_rb != nil {
+			// TODO:: Make koham error
+			return err_rb
+		}
+		// TODO:: Complete this method
+		response, err := ts.ValidateTokenAccess(token, f_user_id, *tokenrb)
+		if err != nil {
+			return err
+		}
+		return c.Status(fiber.StatusOK).JSON(response)
+	}
 
-	// // Request body validation
-	// tokenValidator := validators.TokenValidator{}
-	// err := tokenValidator.ValidatePostBody(*tpb)
-	// if err != nil {
-	// 	return errors.DefaultErrorHandler(c, err)
-	// }
+	response, err := ts.CreateToken(f_user_id)
+	if err != nil {
+		return errors.DefaultErrorHandler(c, err)
+	}
 
-	return c.Status(fiber.StatusCreated).SendString("Token creation successful")
+	// TODO:: Update return to return json that will contain token key and expiry
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (tc TokenController) Put(c *fiber.Ctx) error {

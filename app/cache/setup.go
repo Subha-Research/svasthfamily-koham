@@ -11,19 +11,20 @@ import (
 type Redis struct {
 }
 
-func (r *Redis) getRedisConnectionVariables() (string, int, string) {
+func (r *Redis) getRedisConnectionVariables() (string, string) {
 	config := configs.LoadConfig()
 	port := config["redis.port"].(string)
 	host := config["redis.host"].(string)
-	db := config["redis.acl_db"].(int)
 	address := net.JoinHostPort(host, port)
 	password := url.QueryEscape(config["redis.password"].(string))
 
-	return address, db, password
+	return address, password
 }
 
 func (r *Redis) buildACLRedisOptions() redis.Options {
-	address, db, password := r.getRedisConnectionVariables()
+	config := configs.LoadConfig()
+	db := int(config["redis.acl_db"].(float64))
+	address, password := r.getRedisConnectionVariables()
 	opts := &redis.Options{
 		Addr:     address,
 		Password: password,
@@ -33,7 +34,10 @@ func (r *Redis) buildACLRedisOptions() redis.Options {
 }
 
 func (r *Redis) buildTokenRedisOptions() redis.Options {
-	address, db, password := r.getRedisConnectionVariables()
+	config := configs.LoadConfig()
+	db := int(config["redis.token_db"].(float64))
+
+	address, password := r.getRedisConnectionVariables()
 	opts := &redis.Options{
 		Addr:     address,
 		Password: password,
