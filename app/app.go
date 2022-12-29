@@ -7,6 +7,7 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	routes "github.com/Subha-Research/svasthfamily-koham/app/routes/v1"
+	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
@@ -18,12 +19,14 @@ func InitFiberApplication() *fiber.App {
 }
 
 type KohamApp struct {
-	RoleModel   models.RoleModel
-	AccessModel models.AccessModel
-	Routes      routes.Routes
-	BC          controllers.BaseController
-	BV          base_validators.BaseValidator
-	App         *fiber.App
+	App          *fiber.App
+	RoleModel    models.RoleModel
+	AccessModel  models.AccessModel
+	Routes       routes.Routes
+	BC           controllers.BaseController
+	BV           base_validators.BaseValidator
+	TokenService services.TokenService
+	ACLService   services.ACLService
 }
 
 func (k_app *KohamApp) SetupApp() *fiber.App {
@@ -47,8 +50,10 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 	k_app.AccessModel.Collection = access_coll
 	k_app.AccessModel.InsertAllAccesses()
 
-	k_app.Routes.Controller = k_app.BC
-	k_app.Routes.Validator = k_app.BV
+	k_app.Routes.BaseController = k_app.BC
+	k_app.Routes.BaseValidator = k_app.BV
+	k_app.Routes.ACLService = k_app.ACLService
+	k_app.Routes.TokenService = k_app.TokenService
 	k_app.Routes.SetupRoutes(k_app.App)
 	// Return configured app
 	return k_app.App

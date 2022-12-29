@@ -6,6 +6,8 @@ import (
 )
 
 type BaseController struct {
+	TokenController TokenController
+	ACLController   ACLController
 }
 
 func (bc BaseController) GetHandler(c *fiber.Ctx) error {
