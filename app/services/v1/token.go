@@ -23,7 +23,6 @@ type TokenClaims struct {
 }
 
 func (ts TokenService) GetToken(f_user_id string) (*string, error) {
-	// TODO:: call cache to check if token is present there
 	r := cache.Redis{}
 	redis_client := r.SetupTokenRedisDB()
 	tc := cache.TokenCache{}
@@ -32,12 +31,11 @@ func (ts TokenService) GetToken(f_user_id string) (*string, error) {
 	tv, _ := tc.Get(f_user_id)
 
 	if tv == nil {
-		// TODO:: if not found in cache, check DB
 		database := models.Database{}
-		t_coll, _, err := database.GetCollectionAndSession("sf_tokens")
-		tfromdb := models.TokenModel{}
-		tfromdb.Collection = t_coll
-		result, err := tfromdb.GetToken(f_user_id)
+		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+		tm := models.TokenModel{}
+		tm.Collection = t_coll
+		result, err := tm.GetToken(f_user_id)
 		if err != nil {
 			error_data := map[string]string{
 				"id": f_user_id,
@@ -96,7 +94,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	// TODO :: Use log instead of fmt
 	fmt.Printf("%v %v", ss, err)
 
-	token_coll, _, err := database.GetCollectionAndSession("sf_tokens")
+	token_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
 	if err != nil {
 		return nil, err
 	}
@@ -140,14 +138,14 @@ func (ts TokenService) ValidateTokenAccess(token *string, f_user_id string, rb v
 	if err != nil {
 		return nil, err
 	}
-	if &db_token_key != &token {
+	if *db_token_key != *token {
 		return nil, errors.KohamError("KSE-4009")
 	}
 	acesslist, _ := ts.ParseToken(*token, f_user_id)
 	for _, v := range acesslist {
 		if v.ChildMemberID == rb.ChildmemberID {
-			for _, e := range v.AccessEnums.([]float64) {
-				if e == rb.AccessEnum {
+			for _, e := range v.AccessEnums.([]interface{}) {
+				if e.(float64) == rb.AccessEnum {
 					// Build Response
 					vtr := dto.ValidateTokenResponse{}
 					vtr.Access = true

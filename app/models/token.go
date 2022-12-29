@@ -63,7 +63,7 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 		}
 		return nil, err
 	}
-	fmt.Printf("TOKEN ID DOCUMENT FOR USER ID  %v", result)
+	fmt.Printf("Token document %v", result)
 	gtr := dto.GetTokenResponse{}
 	gtr.TokenKey = result["token_key"].(string)
 	gtr.TokenExpiry = result["expiry"].(time.Time)
