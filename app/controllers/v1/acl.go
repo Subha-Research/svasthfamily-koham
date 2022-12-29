@@ -24,12 +24,8 @@ func (acl ACLController) Get(c *fiber.Ctx) error {
 }
 
 func (acl ACLController) Post(c *fiber.Ctx) error {
-	// Validate request body
-	// Call service method build model data
 	// TODO:: Validate token access before inserting
 	// into database
-	// Implement dependeny injection
-	// Insert into database
 	// Implement DTO
 	f_user_id := c.Params("user_id")
 
@@ -48,13 +44,31 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	}
 
 	// Call service
-	if err := acl.Service.CreateSFRelationship(f_user_id, *aclpb); err != nil {
+	acl_s := services.ACLService{}
+	if err := acl_s.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	return c.Status(fiber.StatusOK).SendString("POST family ACL")
 }
 
 func (acl ACLController) Put(c *fiber.Ctx) error {
+	f_user_id := c.Params("user_id")
+
+	aclputb := new(validators.ACLPutBody)
+	if err := c.BodyParser(aclputb); err != nil {
+		// If any error in body parsing of fiber
+		// So we return fiber error
+		return errors.DefaultErrorHandler(c, fiber.NewError(400, "Body Parsing failed"))
+	}
+	acl_validator := validators.ACLValidator{}
+	err := acl_validator.ValidateACLPutBody(*aclputb, f_user_id)
+	if err != nil {
+		return errors.DefaultErrorHandler(c, err)
+	}
+	uar_s := services.ACLService{}
+	if err := uar_s.UpdateAccessRelationship(f_user_id, *aclputb); err != nil {
+		return errors.DefaultErrorHandler(c, err)
+	}
 	return c.Status(fiber.StatusOK).SendString("PUT family ACL")
 }
 

@@ -1,7 +1,9 @@
 package validators
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/Subha-Research/svasthfamily-koham/app/enums"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
+	validator "github.com/go-playground/validator/v10"
 )
 
 type TokenPostBody struct {
@@ -10,23 +12,32 @@ type TokenPostBody struct {
 
 type TokenValidator struct {
 }
+type TokenRequestBody struct {
+	ChildmemberID string  `json:"child_member_id" validate:"required,uuid4_rfc4122"`
+	AccessEnum    float64 `json:"access_enum" validate:"required,number"`
+}
 
-func (tv *TokenValidator) ValidatePostBody(tpb TokenPostBody) *fiber.Error {
-	// var validate = validator.New()
-	// err := validate.Struct(tpb)
+func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
+	err := validate.Struct(rb)
+	error_data := map[string]string{
+		"key": "role",
+	}
 
-	// if err != nil {
-	// 	for _, err := range err.(validator.ValidationErrors) {
-	// 		// var element errorResponse
-	// 		// // fmt.Printf("*** %#v \n", err)
-	// 		// element.MissingField = err.StructNamespace()
-	// 		// element.Tag = err.ActualTag()
-	// 		// element.Value = err.Param()
-	// 		// element.Message = fmt.Sprintf("Invalid value of %s", err.StructNamespace())
-	// 		// errors = append(errors, &element)
-	// 		_ := fmt.Sprintf("%s", err.StructNamespace())
-	// 		return fiber.NewError(fiber.StatusBadRequest, "KDE-4001")
-	// 	}
-	// }
-	return nil
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			error_data["key"] = err.Field()
+			return errors.KohamError("KSE-4006", error_data)
+		}
+	}
+
+	// Validate access enums
+	d := enums.Accesses
+	for k := range d {
+		if k == rb.AccessEnum {
+			return nil
+		}
+
+	}
+	error_data["key"] = "access"
+	return errors.KohamError("KSE-4006", error_data)
 }

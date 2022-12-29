@@ -18,7 +18,7 @@ type Routes struct {
 func (r *Routes) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/v1")
 
-	v1 := api.Group("/family/users/:user_id/:resource_type")
+	v1 := api.Group("/family/users/:user_id/:resource_type/:validate?")
 
 	// Fiber middleware to validate headers.
 	v1.Use("/", func(c *fiber.Ctx) error {
@@ -27,8 +27,11 @@ func (r *Routes) SetupRoutes(app *fiber.App) {
 		if err != nil {
 			return errors.DefaultErrorHandler(c, err)
 		}
+		c.Locals("token", token)
 		return c.Next()
 	})
 	v1.Get("/", r.BaseController.GetHandler)
 	v1.Post("/", r.BaseController.PostHandler)
+	v1.Put("/", r.BaseController.PutHandler)
+	v1.Delete("/", r.BaseController.DeleteHandler)
 }
