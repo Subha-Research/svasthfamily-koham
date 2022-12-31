@@ -19,11 +19,12 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	if c.Get("Content-Type") != "application/json" {
 		return nil, errors.KohamError("KSE-4001")
 	}
-	is_validate := c.Params("validate")
+	opt_param := c.Params("validate")
 	resource_type := c.Params("resource_type")
+
 	user_id := c.Params("user_id")
 
-	if resource_type == "tokens" && is_validate == "" {
+	if resource_type == "tokens" && opt_param == "" {
 		log.Println(c.Get("x-service-id"))
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {
@@ -34,7 +35,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		if x_service_id.String() != XServiceID {
 			return nil, errors.KohamError("KSE-4005")
 		}
-	} else if resource_type == "acls" || (resource_type == "tokens" && is_validate == "validate") {
+	} else if resource_type == "acls" || (resource_type == "tokens" && opt_param == "validate") {
 		auth := c.Get("Authorization")
 		if auth == "" {
 			return nil, errors.KohamError("KSE-4003")

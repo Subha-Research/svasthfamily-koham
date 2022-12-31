@@ -57,8 +57,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	database := models.Database{}
 	tm := models.TokenModel{}
 
-	// TODO:: Move this to constants
-	signing_key := []byte("OUR_SECRET_KEY")
+	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
 
 	ar_coll, _, err := database.GetCollectionAndSession("sf_access_relationship")
@@ -116,7 +115,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 func (ts TokenService) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
 	token, err := jwt.ParseWithClaims(token_string, &TokenClaims{}, func(*jwt.Token) (secret interface{}, err error) {
 		// TODO:: Move this to constants
-		return []byte("OUR_SECRET_KEY"), nil
+		return []byte(constants.TokenSigingKey), nil
 	})
 	if err != nil {
 		return nil, errors.KohamError("KSE-4009")

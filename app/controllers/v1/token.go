@@ -16,9 +16,12 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 
 func (tc TokenController) Post(c *fiber.Ctx) error {
 	token := c.Locals("token").(*string)
+
 	f_user_id := c.Params("user_id")
 	ts := services.TokenService{}
-	if c.Params("validate") == "validate" {
+
+	opt_param := c.Params("validate")
+	if opt_param == "validate" {
 		tokenrb := new(validators.TokenRequestBody)
 		err := c.BodyParser(tokenrb)
 		if err != nil {
@@ -34,16 +37,18 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 		}
 		response, err := ts.ValidateTokenAccess(token, f_user_id, *tokenrb)
 		if err != nil {
-			return err
+			return errors.DefaultErrorHandler(c, err)
 		}
 		return c.Status(fiber.StatusOK).JSON(response)
+	} else if opt_param == "" {
+		response, err := ts.CreateToken(f_user_id)
+		if err != nil {
+			return errors.DefaultErrorHandler(c, err)
+		}
+		return c.Status(fiber.StatusCreated).JSON(response)
 	}
+	return c.Status(fiber.StatusNotFound).SendString("404 URL not found")
 
-	response, err := ts.CreateToken(f_user_id)
-	if err != nil {
-		return errors.DefaultErrorHandler(c, err)
-	}
-	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (tc TokenController) Put(c *fiber.Ctx) error {
