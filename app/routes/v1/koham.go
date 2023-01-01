@@ -4,15 +4,12 @@ import (
 	base_validators "github.com/Subha-Research/svasthfamily-koham/app/base-validators"
 	controllers "github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
-	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Routes struct {
-	BaseController controllers.BaseController
-	BaseValidator  base_validators.BaseValidator
-	TokenService   services.TokenService
-	ACLService     services.ACLService
+	BaseController *controllers.BaseController
+	BaseValidator  *base_validators.BaseValidator
 }
 
 func (r *Routes) SetupRoutes(app *fiber.App) {

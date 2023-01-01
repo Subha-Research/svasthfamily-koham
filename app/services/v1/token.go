@@ -14,6 +14,9 @@ import (
 )
 
 type TokenService struct {
+	Model   *models.TokenModel
+	ARModel *models.AccessRelationshipModel
+	Cache   *cache.TokenCache
 }
 
 type TokenClaims struct {
@@ -23,19 +26,14 @@ type TokenClaims struct {
 }
 
 func (ts TokenService) GetToken(f_user_id string) (*string, error) {
-	r := cache.Redis{}
-	redis_client := r.SetupTokenRedisDB()
-	tc := cache.TokenCache{}
-	// Dependeny injection
-	tc.RedisClient = &redis_client
-	tv, _ := tc.Get(f_user_id)
+	tv, _ := ts.Cache.Get(f_user_id)
 
 	if tv == nil {
 		database := models.Database{}
 		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-		tm := models.TokenModel{}
-		tm.Collection = t_coll
-		result, err := tm.GetToken(f_user_id)
+		// tm := models.TokenModel{}
+		ts.Model.Collection = t_coll
+		result, err := ts.Model.GetToken(f_user_id)
 		if err != nil {
 			error_data := map[string]string{
 				"id": f_user_id,
@@ -53,9 +51,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
-	arm := models.AccessRelationshipModel{}
 	database := models.Database{}
-	tm := models.TokenModel{}
 
 	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
@@ -64,8 +60,8 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	if err != nil {
 		return nil, err
 	}
-	arm.Collection = ar_coll
-	all_access_relations, err := arm.GetAllAccessRelationship(f_user_id)
+	ts.ARModel.Collection = ar_coll
+	all_access_relations, err := ts.ARModel.GetAllAccessRelationship(f_user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -97,18 +93,13 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	if err != nil {
 		return nil, err
 	}
-	tm.Collection = token_coll
-	data, insert_err := tm.InsertToken(f_user_id, ss, token_expiry.Time)
+	ts.Model.Collection = token_coll
+	data, insert_err := ts.Model.InsertToken(f_user_id, ss, token_expiry.Time)
 	if insert_err != nil {
 		return nil, insert_err
 	}
 	// Cache call
-	// Dependency injection pattern
-	r := cache.Redis{}
-	redis_client := r.SetupTokenRedisDB()
-	tc := cache.TokenCache{}
-	tc.RedisClient = &redis_client
-	tc.Set(f_user_id, data.TokenKey, constants.TokenExpiryTTL)
+	ts.Cache.Set(f_user_id, data.TokenKey, constants.TokenExpiryTTL)
 	return data, nil
 }
 

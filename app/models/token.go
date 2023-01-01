@@ -17,7 +17,6 @@ import (
 type TokenModel struct {
 	Collection *mongo.Collection
 	Session    *mongo.Session
-	// InsertReturn dto.CreateTokenResponse
 }
 
 func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Time) (*dto.CreateTokenResponse, error) {

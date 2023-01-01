@@ -7,13 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// type IACLController interface {
-// 	Get(*fiber.Ctx) error
-// 	Post(*fiber.Ctx) error
-// 	Put(*fiber.Ctx) error
-// 	Delete(*fiber.Ctx) error
-// }
-
 type ACLController struct {
 	Validator validators.ACLValidator
 	Service   services.ACLService
@@ -44,8 +37,8 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	}
 
 	// Call service
-	acl_s := services.ACLService{}
-	if err := acl_s.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
+	// acl_s := services.ACLService{}
+	if err := acl.Service.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	return c.Status(fiber.StatusOK).SendString("POST family ACL")

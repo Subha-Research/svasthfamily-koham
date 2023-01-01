@@ -6,8 +6,8 @@ import (
 )
 
 type BaseController struct {
-	TokenController TokenController
-	ACLController   ACLController
+	TokenController *TokenController
+	ACLController   *ACLController
 }
 
 func (bc BaseController) GetHandler(c *fiber.Ctx) error {
@@ -15,9 +15,9 @@ func (bc BaseController) GetHandler(c *fiber.Ctx) error {
 
 	// CLEANUPS:: Remove hardcoded values
 	if resource_type == "tokens" {
-		return interfaces.IRequest.Get(TokenController{}, c)
+		return interfaces.IRequest.Get(bc.TokenController, c)
 	} else if resource_type == "acls" {
-		return interfaces.IRequest.Get(ACLController{}, c)
+		return interfaces.IRequest.Get(bc.ACLController, c)
 	} else {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
 	}
@@ -28,9 +28,9 @@ func (bc BaseController) PostHandler(c *fiber.Ctx) error {
 
 	// CLEANUPS:: Remove hardcoded values
 	if resource_type == "tokens" {
-		return interfaces.IRequest.Post(TokenController{}, c)
+		return interfaces.IRequest.Post(bc.TokenController, c)
 	} else if resource_type == "acls" {
-		return interfaces.IRequest.Post(ACLController{}, c)
+		return interfaces.IRequest.Post(bc.ACLController, c)
 	} else {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
 	}
@@ -41,9 +41,9 @@ func (bc BaseController) PutHandler(c *fiber.Ctx) error {
 
 	// CLEANUPS:: Remove hardcoded values
 	if resource_type == "tokens" {
-		return interfaces.IRequest.Put(TokenController{}, c)
+		return interfaces.IRequest.Put(bc.TokenController, c)
 	} else if resource_type == "acls" {
-		return interfaces.IRequest.Put(ACLController{}, c)
+		return interfaces.IRequest.Put(bc.ACLController, c)
 	} else {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
 	}
@@ -55,9 +55,9 @@ func (bc BaseController) DeleteHandler(c *fiber.Ctx) error {
 
 	// CLEANUPS:: Remove hardcoded values
 	if resource_type == "tokens" {
-		return interfaces.IRequest.Delete(TokenController{}, c)
+		return interfaces.IRequest.Delete(bc.TokenController, c)
 	} else if resource_type == "acls" {
-		return interfaces.IRequest.Delete(ACLController{}, c)
+		return interfaces.IRequest.Delete(bc.ACLController, c)
 	} else {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request parameters")
 	}
