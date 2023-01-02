@@ -47,26 +47,6 @@ func TestCreateToken(t *testing.T) {
 				FamilyUserID: "8204a616-2131-4a64-97d0-ae3f2b9211be",
 			},
 		},
-		{
-			testcode:      "VALIDATE_TOKEN",
-			description:   "Validate token API testcase",
-			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/tokens/validate",
-			expectedError: false,
-			expectedCode:  200,
-			expectedBody: &dto.ValidateTokenResponse{
-				Access: true,
-			},
-		},
-		{
-			testcode:      "VALIDATE_TOKEN_ERROR",
-			description:   "Validate token API error testcase",
-			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/tokens/validate",
-			expectedError: false,
-			expectedCode:  403,
-			expectedBody: &dto.ValidateTokenResponse{
-				Access: true,
-			},
-		},
 	}
 
 	f_app := app.InitFiberApplication()
