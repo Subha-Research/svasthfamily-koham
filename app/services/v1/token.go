@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/cache"
@@ -25,13 +25,12 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (ts TokenService) GetToken(f_user_id string) (*string, error) {
+func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 	tv, _ := ts.Cache.Get(f_user_id)
 
 	if tv == nil {
 		database := models.Database{}
 		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-		// tm := models.TokenModel{}
 		ts.Model.Collection = t_coll
 		result, err := ts.Model.GetToken(f_user_id)
 		if err != nil {
@@ -47,7 +46,7 @@ func (ts TokenService) GetToken(f_user_id string) (*string, error) {
 	return tv, nil
 }
 
-func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
+func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
@@ -56,7 +55,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
 
-	ar_coll, _, err := database.GetCollectionAndSession("sf_access_relationship")
+	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +68,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	acl_dto, err := dto.FormatAllAccessRelationship(all_access_relations)
 
 	if err != nil {
+		log.Println("Error in formatting access relationship data", err)
 		return nil, err
 	}
 
@@ -86,8 +86,10 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(signing_key)
-	// TODO :: Use log instead of fmt
-	fmt.Printf("%v %v", ss, err)
+	if err != nil {
+		log.Println("Error while signing token", err)
+		return nil, errors.KohamError("KSE-5001")
+	}
 
 	token_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
 	if err != nil {
@@ -103,7 +105,7 @@ func (ts TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, 
 	return data, nil
 }
 
-func (ts TokenService) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
+func (ts *TokenService) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
 	token, err := jwt.ParseWithClaims(token_string, &TokenClaims{}, func(*jwt.Token) (secret interface{}, err error) {
 		// TODO:: Move this to constants
 		return []byte(constants.TokenSigingKey), nil
@@ -123,7 +125,7 @@ func (ts TokenService) ParseToken(token_string string, f_user_id string) ([]dto.
 	}
 	return claims.AccessList, nil
 }
-func (ts TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
+func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
 	db_token_key, err := ts.GetToken(f_user_id)
 	if err != nil {
 		return nil, err

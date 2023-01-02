@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/enums"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -18,7 +19,7 @@ type ACLService struct {
 
 func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, rb validators.ACLPostBody) error {
 	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession("access_relationship")
+	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
 	if err != nil {
 		log.Fatal("Errro in  getting collection and session. Stopping server", err)
 	}
@@ -48,7 +49,7 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, rb validator
 
 func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) error {
 	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession("access_relationship")
+	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
 	if err != nil {
 		log.Fatal("Errro in  getting collection and session. Stopping server", err)
 	}

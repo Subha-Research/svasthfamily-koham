@@ -31,7 +31,7 @@ func main() {
 			},
 			TokenController: &controllers.TokenController{
 				Validator: &validators.TokenValidator{},
-				Service: &services.TokenService{
+				IService: &services.TokenService{
 					Model:   &models.TokenModel{},
 					ARModel: &models.AccessRelationshipModel{},
 					Cache: &cache.TokenCache{

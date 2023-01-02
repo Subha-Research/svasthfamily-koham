@@ -17,7 +17,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPingRoute(t *testing.T) {
+type TokenRouteTest struct {
+}
+
+func (token *TokenRouteTest) TestCreateToken(t *testing.T) {
 	tests := []struct {
 		description string
 		route       string
@@ -27,15 +30,15 @@ func TestPingRoute(t *testing.T) {
 		expectedBody  string
 	}{
 		{
-			description:   "ping route testcase",
-			route:         "/ping",
+			description:   "ACL API testcase",
+			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/acls",
 			expectedError: false,
 			expectedCode:  200,
 			expectedBody:  "Ping is working.",
 		},
 	}
-
 	f_app := app.InitFiberApplication()
+
 	app := &app.KohamApp{
 		App: f_app,
 		Routes: &routes.Routes{
