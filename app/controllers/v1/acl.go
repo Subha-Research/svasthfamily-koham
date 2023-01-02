@@ -8,6 +8,8 @@ import (
 )
 
 type ACLController struct {
+	Validator validators.ACLValidator
+	Service   services.ACLService
 }
 
 func (acl ACLController) Get(c *fiber.Ctx) error {
@@ -29,15 +31,14 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 
 	// Request body validation
 	// CLEANUP:: Access using interface
-	acl_validator := validators.ACLValidator{}
-	err := acl_validator.ValidateACLPostBody(*aclpb, f_user_id)
+	err := acl.Validator.ValidateACLPostBody(*aclpb, f_user_id)
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 
 	// Call service
-	acl_s := services.ACLService{}
-	if err := acl_s.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
+	// acl_s := services.ACLService{}
+	if err := acl.Service.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	return c.Status(fiber.StatusOK).SendString("POST family ACL")

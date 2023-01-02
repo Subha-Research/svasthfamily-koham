@@ -11,6 +11,7 @@ import (
 )
 
 type BaseValidator struct {
+	TokenService *services.TokenService
 }
 
 const XServiceID = "d8c3eed5-8eda-441e-bcc1-16fab23b3ab7"
@@ -46,8 +47,8 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		} else {
 			// TRY to decode JWT token
 			// return nil
-			ts := services.TokenService{}
-			_, err := ts.ParseToken(token[1], user_id)
+			// ts := services.TokenService{}
+			_, err := bv.TokenService.ParseToken(token[1], user_id)
 			if err != nil {
 				return nil, err
 			}

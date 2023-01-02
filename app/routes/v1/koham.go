@@ -7,27 +7,28 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App) {
-	api := app.Group("/api/v1")
+type Routes struct {
+	BaseController *controllers.BaseController
+	BaseValidator  *base_validators.BaseValidator
+}
 
-	bc := controllers.BaseController{}
+func (r *Routes) SetupRoutes(app *fiber.App) {
+	api := app.Group("/api/v1")
 
 	v1 := api.Group("/family/users/:user_id/:resource_type/:validate?")
 
 	// Fiber middleware to validate headers.
 	v1.Use("/", func(c *fiber.Ctx) error {
 		// Validate headers if headers has required keys or not.
-		bv := base_validators.BaseValidator{}
-		token, err := bv.ValidateHeaders(c)
-
+		token, err := r.BaseValidator.ValidateHeaders(c)
 		if err != nil {
 			return errors.DefaultErrorHandler(c, err)
 		}
 		c.Locals("token", token)
 		return c.Next()
 	})
-	v1.Get("/", bc.GetHandler)
-	v1.Post("/", bc.PostHandler)
-	v1.Put("/", bc.PutHandler)
-	v1.Delete("/", bc.DeleteHandler)
+	v1.Get("/", r.BaseController.GetHandler)
+	v1.Post("/", r.BaseController.PostHandler)
+	v1.Put("/", r.BaseController.PutHandler)
+	v1.Delete("/", r.BaseController.DeleteHandler)
 }

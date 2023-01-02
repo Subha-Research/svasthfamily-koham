@@ -8,6 +8,9 @@ Role, Access and Token Management Service
   <!-- 1. Using docker compose to run mysql and redis - `docker compose up -d` -->
   2. Download dependencies - `go mod download`
   3. Run main - `go run main.go`
+  ### Unit testing
+  1. Run `go test ./tests/... -coverprofile=coverage.out -coverpkg ./...`
+  2. Convert to html, to open in browser `go tool cover -html coverage.out -o coverage.html`
   ### Setup and run pre-commit
   <!-- 1. Install golangci-lint - `brew install golangci-lint` or follow this - `https://golangci-lint.run/usage/install/
   2. Install pre-commit for enabling hooks - `brew install pre-commit`
