@@ -45,6 +45,7 @@ func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Ti
 	ctr.TokenKey = token
 	ctr.TokenExpiry = expiry
 	ctr.FamilyUserID = f_user_id
+	ctr.Audit = *as
 	return &ctr, nil
 }
 

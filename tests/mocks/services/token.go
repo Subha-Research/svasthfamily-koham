@@ -19,7 +19,8 @@ type TokenServiceMock struct {
 func (tsm *TokenServiceMock) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
 	all_access_relations, _ := tsm.ARModel.GetAllAccessRelationship(f_user_id)
 	signing_key := []byte(constants.TokenSigingKey)
-	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
+	loc, err := time.LoadLocation("Asia/Kolkata")
+	token_expiry := jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc).Add(constants.TokenExpiryTTL * time.Hour))
 	dto := dto.AccessRelationshipDTO{}
 	acl_dto, err := dto.FormatAllAccessRelationship(all_access_relations)
 	if err != nil {
@@ -31,7 +32,7 @@ func (tsm *TokenServiceMock) CreateToken(f_user_id string) (*dto.CreateTokenResp
 		RegisteredClaims: jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: token_expiry,
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc)),
 			Issuer:    constants.Issuer,
 		},
 	}
