@@ -66,8 +66,18 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 	fmt.Printf("Token document %v", result)
 	gtr := dto.GetTokenResponse{}
 	gtr.TokenKey = result["token_key"].(string)
-	gtr.TokenExpiry = result["expiry"].(time.Time)
+	gtr.TokenExpiry = result["expires_at"].(time.Time)
 	gtr.FamilyUserID = result["family_user_id"].(string)
 
 	return &gtr, nil
+}
+
+func (tm *TokenModel) DeleteToken(f_user_id *string, token *string) error {
+	//database := client.Database("")
+	//podcastsCollection := database.Collection("")
+	_, err := tm.Collection.DeleteOne(context.TODO(), bson.D{{Key: "family_user_id", Value: f_user_id}, {Key: "token_key", Value: token}})
+	if err != nil {
+		return errors.KohamError("KSE-5001")
+	}
+	return nil
 }

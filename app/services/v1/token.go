@@ -25,23 +25,38 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
+	database := models.Database{}
+	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+	if err != nil {
+		return nil, errors.KohamError("KSE-5001")
+
+	}
+
+	ts.Model.Collection = t_coll
+	result, err := ts.Model.GetToken(f_user_id)
+	if err != nil {
+		error_data := map[string]string{
+			"id": f_user_id,
+		}
+		return nil, errors.KohamError("KSE-4010", error_data)
+	}
+
+	return result, nil
+}
+
 func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 	tv, _ := ts.Cache.Get(f_user_id)
 
 	if tv == nil {
-		database := models.Database{}
-		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-		ts.Model.Collection = t_coll
-		result, err := ts.Model.GetToken(f_user_id)
+		result, err := ts.GetTokenDataFromDb(f_user_id)
 		if err != nil {
 			error_data := map[string]string{
 				"id": f_user_id,
 			}
 			return nil, errors.KohamError("KSE-4010", error_data)
 		}
-
-		tokenkey := result.TokenKey
-		return &tokenkey, nil
+		tv = &result.TokenKey
 	}
 	return tv, nil
 }
@@ -147,4 +162,28 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		}
 	}
 	return nil, errors.KohamError("KSE-4009")
+}
+
+func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
+	result, err := ts.GetTokenDataFromDb(*f_user_id)
+	if err != nil {
+		error_data := map[string]string{
+			"id": *f_user_id,
+		}
+		return errors.KohamError("KSE-4010", error_data)
+
+	}
+	if &result.TokenKey == token {
+		database := models.Database{}
+		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+		if err != nil {
+			return errors.KohamError("KSE-5001")
+		}
+		ts.Model.Collection = t_coll
+		err_del := ts.Model.DeleteToken(f_user_id, token)
+		if err_del != nil {
+			return err_del
+		}
+	}
+	return nil
 }
