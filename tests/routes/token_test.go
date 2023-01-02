@@ -16,8 +16,11 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/routes/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
+
+	// services_mock "github.com/Subha-Research/svasthfamily-koham/tests/mocks/services"
 	models_mock "github.com/Subha-Research/svasthfamily-koham/tests/mocks/models"
 	services_mock "github.com/Subha-Research/svasthfamily-koham/tests/mocks/services"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +33,7 @@ func TestCreateToken(t *testing.T) {
 		// Expected output
 		expectedError bool
 		expectedCode  int
-		expectedBody  *dto.CreateTokenResponse
+		expectedBody  interface{}
 	}{
 		{
 			testcode:      "CREATE_TOKEN",
@@ -44,9 +47,29 @@ func TestCreateToken(t *testing.T) {
 				FamilyUserID: "8204a616-2131-4a64-97d0-ae3f2b9211be",
 			},
 		},
+		{
+			testcode:      "VALIDATE_TOKEN",
+			description:   "Validate token API testcase",
+			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/tokens/validate",
+			expectedError: false,
+			expectedCode:  200,
+			expectedBody: &dto.ValidateTokenResponse{
+				Access: true,
+			},
+		},
+		{
+			testcode:      "VALIDATE_TOKEN_ERROR",
+			description:   "Validate token API error testcase",
+			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/tokens/validate",
+			expectedError: false,
+			expectedCode:  403,
+			expectedBody: &dto.ValidateTokenResponse{
+				Access: true,
+			},
+		},
 	}
-	f_app := app.InitFiberApplication()
 
+	f_app := app.InitFiberApplication()
 	app := &app.KohamApp{
 		App: f_app,
 		Routes: &routes.Routes{
@@ -62,7 +85,7 @@ func TestCreateToken(t *testing.T) {
 				},
 				TokenController: &controllers.TokenController{
 					Validator: &validators.TokenValidator{},
-					IService: &services_mock.TokenServiceMock{
+					IService: &services_mock.TokenServiceTest{
 						Model:   &models_mock.TokenModelMock{},
 						ARModel: &models_mock.AccessRelationshipModelMock{},
 					},

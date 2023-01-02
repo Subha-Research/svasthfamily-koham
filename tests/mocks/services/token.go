@@ -11,13 +11,13 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type TokenServiceMock struct {
+type TokenServiceTest struct {
 	Model   *models_mock.TokenModelMock
 	ARModel *models_mock.AccessRelationshipModelMock
 }
 
-func (tsm *TokenServiceMock) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
-	all_access_relations, _ := tsm.ARModel.GetAllAccessRelationship(f_user_id)
+func (tst *TokenServiceTest) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
+	all_access_relations, _ := tst.ARModel.GetAllAccessRelationship(f_user_id)
 	signing_key := []byte(constants.TokenSigingKey)
 	loc, err := time.LoadLocation("Asia/Kolkata")
 	token_expiry := jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc).Add(constants.TokenExpiryTTL * time.Hour))
@@ -39,21 +39,21 @@ func (tsm *TokenServiceMock) CreateToken(f_user_id string) (*dto.CreateTokenResp
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(signing_key)
-	data, insert_err := tsm.Model.InsertToken(f_user_id, ss, token_expiry.Time)
+	data, insert_err := tst.Model.InsertToken(f_user_id, ss, token_expiry.Time)
 	if insert_err != nil {
 		return nil, insert_err
 	}
 	return data, nil
 }
 
-func (tsm *TokenServiceMock) GetToken(f_user_id string) (*string, error) {
+func (tst *TokenServiceTest) GetToken(f_user_id string) (*string, error) {
 	return nil, nil
 }
 
-func (tsm *TokenServiceMock) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
+func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
 	return nil, nil
 }
 
-func (tsm *TokenServiceMock) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
+func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
 	return nil, nil
 }

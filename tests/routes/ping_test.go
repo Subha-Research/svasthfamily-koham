@@ -51,7 +51,7 @@ func TestPingRoute(t *testing.T) {
 				},
 				TokenController: &controllers.TokenController{
 					Validator: &validators.TokenValidator{},
-					IService: &services_mock.TokenServiceMock{
+					IService: &services_mock.TokenServiceTest{
 						Model:   &models_mock.TokenModelMock{},
 						ARModel: &models_mock.AccessRelationshipModelMock{},
 					},
