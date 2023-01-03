@@ -57,3 +57,7 @@ func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) (
 func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
 	return nil, nil
 }
+
+func (tst *TokenServiceTest) DeleteToken(f_user_id *string, tokecn *string) error {
+	return nil
+}
