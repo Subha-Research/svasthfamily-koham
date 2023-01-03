@@ -1,6 +1,7 @@
 package constants
 
 // var Issuer string
+const Timezone = "Asia/Kolkata"
 const Issuer = "svasthfamily-koham"
 const TokenCollection = "tokens"
 const TokenExpiryTTL = 7 * 24

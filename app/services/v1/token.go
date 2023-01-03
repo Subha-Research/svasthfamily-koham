@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/cache"
+	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/dto"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
@@ -25,23 +26,37 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
+	database := models.Database{}
+	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+	if err != nil {
+		return nil, errors.KohamError("KSE-5001")
+	}
+
+	ts.Model.Collection = t_coll
+	result, err := ts.Model.GetToken(f_user_id)
+	if err != nil {
+		error_data := map[string]string{
+			"id": f_user_id,
+		}
+		return nil, errors.KohamError("KSE-4010", error_data)
+	}
+
+	return result, nil
+}
+
 func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 	tv, _ := ts.Cache.Get(f_user_id)
 
 	if tv == nil {
-		database := models.Database{}
-		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-		ts.Model.Collection = t_coll
-		result, err := ts.Model.GetToken(f_user_id)
+		result, err := ts.GetTokenDataFromDb(f_user_id)
 		if err != nil {
 			error_data := map[string]string{
 				"id": f_user_id,
 			}
 			return nil, errors.KohamError("KSE-4010", error_data)
 		}
-
-		tokenkey := result.TokenKey
-		return &tokenkey, nil
+		tv = &result.TokenKey
 	}
 	return tv, nil
 }
@@ -50,10 +65,16 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
-	database := models.Database{}
 
+	err := ts.DeleteToken(&f_user_id, nil)
+	if err != nil {
+		log.Println("Error in deleting token in create token API", err)
+	}
+
+	database := models.Database{}
+	time_util := common.TimeUtil{}
 	signing_key := []byte(constants.TokenSigingKey)
-	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
+	token_expiry := jwt.NewNumericDate(time_util.CurrentTimeInUTC().Add(constants.TokenExpiryTTL * time.Hour))
 
 	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
 	if err != nil {
@@ -79,7 +100,7 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: token_expiry,
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(*time_util.CurrentTimeInUTC()),
 			Issuer:    constants.Issuer,
 		},
 	}
@@ -147,4 +168,37 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		}
 	}
 	return nil, errors.KohamError("KSE-4009")
+}
+
+func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
+	result, err := ts.GetTokenDataFromDb(*f_user_id)
+	if err != nil {
+		error_data := map[string]string{
+			"id": *f_user_id,
+		}
+		return errors.KohamError("KSE-4010", error_data)
+	}
+
+	database := models.Database{}
+	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+	if err != nil {
+		return errors.KohamError("KSE-5001")
+	}
+	ts.Model.Collection = t_coll
+
+	var delete_token_key *string
+	if token == nil {
+		delete_token_key = &result.TokenKey
+	} else if token != nil && *&result.TokenKey == *token {
+		delete_token_key = token
+	} else {
+		return errors.KohamError("KSE-4009")
+	}
+	err_del := ts.Model.DeleteToken(f_user_id, delete_token_key)
+	if err_del != nil {
+		return err_del
+	}
+	// Delete from redis also
+	ts.Cache.InvalidateKey(*f_user_id)
+	return nil
 }

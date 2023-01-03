@@ -10,4 +10,5 @@ type ITokenService interface {
 	CreateToken(string) (*dto.CreateTokenResponse, error)
 	ParseToken(string, string) ([]dto.AccessRelation, error)
 	ValidateTokenAccess(*string, string, validators.TokenRequestBody) (*dto.ValidateTokenResponse, error)
+	DeleteToken(*string, *string) error
 }

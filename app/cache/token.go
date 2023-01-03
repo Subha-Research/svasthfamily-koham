@@ -32,6 +32,11 @@ func (tc *TokenCache) Set(key string, value interface{}, ttl_in_hour int64) erro
 }
 
 // Invalidate a key in redis token DB
-func (tc *TokenCache) InvalidateKey() {
-	// TODO :: Update logic
+func (tc *TokenCache) InvalidateKey(key string) error {
+	_, err := tc.RedisClient.GetDel(context.Background(), key).Result()
+	if err != nil {
+		log.Println("Errro in invalidating key from redis", err)
+		return err
+	}
+	return nil
 }
