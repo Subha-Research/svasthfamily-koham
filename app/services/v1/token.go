@@ -66,6 +66,11 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
 
+	err := ts.DeleteToken(&f_user_id, nil)
+	if err != nil {
+		log.Println("Error in deleting token in create token API", err)
+	}
+
 	database := models.Database{}
 	time_util := common.TimeUtil{}
 	signing_key := []byte(constants.TokenSigingKey)
@@ -173,17 +178,27 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		}
 		return errors.KohamError("KSE-4010", error_data)
 	}
-	if *&result.TokenKey == *token {
-		database := models.Database{}
-		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-		if err != nil {
-			return errors.KohamError("KSE-5001")
-		}
-		ts.Model.Collection = t_coll
-		err_del := ts.Model.DeleteToken(f_user_id, token)
-		if err_del != nil {
-			return err_del
-		}
+
+	database := models.Database{}
+	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
+	if err != nil {
+		return errors.KohamError("KSE-5001")
 	}
-	return errors.KohamError("KSE-4009")
+	ts.Model.Collection = t_coll
+
+	var delete_token_key *string
+	if token == nil {
+		delete_token_key = &result.TokenKey
+	} else if token != nil && *&result.TokenKey == *token {
+		delete_token_key = token
+	} else {
+		return errors.KohamError("KSE-4009")
+	}
+	err_del := ts.Model.DeleteToken(f_user_id, delete_token_key)
+	if err_del != nil {
+		return err_del
+	}
+	// Delete from redis also
+	ts.Cache.InvalidateKey(*f_user_id)
+	return nil
 }

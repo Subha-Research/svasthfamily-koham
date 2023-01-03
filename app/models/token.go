@@ -56,7 +56,10 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 	var result bson.M
 	err := tm.Collection.FindOne(
 		context.TODO(),
-		bson.D{{Key: "family_user_id", Value: f_user_id}},
+		bson.D{
+			{Key: "family_user_id", Value: f_user_id},
+			{Key: "expires_at", Value: bson.D{{Key: "$gte", Value: primitive.NewDateTimeFromTime(time.Now())}}},
+		},
 	).Decode(&result)
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in

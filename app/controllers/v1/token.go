@@ -60,7 +60,9 @@ func (tc TokenController) Delete(c *fiber.Ctx) error {
 	token := c.Locals("token").(*string)
 	err := tc.IService.DeleteToken(&f_user_id, token)
 	if err != nil {
-		return err
+		return errors.DefaultErrorHandler(c, err)
 	}
-	return c.Status(fiber.StatusOK).SendString("Token DELETE called")
+	return c.Status(fiber.StatusOK).JSON(map[string]string{
+		"message": "Token Deleted successfully",
+	})
 }
