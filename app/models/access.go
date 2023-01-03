@@ -40,7 +40,7 @@ func (am *AccessModel) GetAccess(access_enum float64, access_key string) (bson.M
 func (am *AccessModel) InsertAllAccesses() error {
 	// Collection variable is set via Dependency injection from app file
 	var access_docs []interface{}
-	access_map := enums.Accesses
+	access_map := enums.Head_Default_Accesses
 	for k, v := range access_map {
 		// Check first if the same role already exists
 		// If exist then do not insert that

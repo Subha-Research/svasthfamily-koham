@@ -28,6 +28,7 @@ type ACLPostBody struct {
 	AccessList     []ChildMemberAccess `json:"access_list" validate:"required,min=1,dive"`
 	ParentMemberID string              `json:"parent_member_id" validate:"required,uuid4_rfc4122"`
 	RoleEnum       int                 `json:"role" validate:"required,number"`
+	IsParentHead   *bool               `json:"is_parent_head" validate:"required"`
 }
 
 type ACLPutBody struct {
@@ -52,7 +53,7 @@ func (av *ACLValidator) validateAccess(a_enums []float64) bool {
 	// Run a loop to build freq_hash_map
 	freq_hash_map := map[float64]int{}
 
-	for k := range enums.Accesses {
+	for k := range enums.Head_Default_Accesses {
 		freq_hash_map[k] = 1
 	}
 

@@ -23,7 +23,6 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	opt_param := c.Params("validate")
 	req_method := c.Method()
 	resource_type := c.Params("resource_type")
-
 	user_id := c.Params("user_id")
 
 	if resource_type == "tokens" && opt_param == "" && (req_method == "POST" || req_method == "GET") {
@@ -47,7 +46,10 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 			return nil, errors.KohamError("KSE-4004")
 		} else {
 			// TRY to decode JWT token
-			_, err := bv.TokenService.ParseToken(token[1], user_id)
+
+			// return nil
+			ts := services.TokenService{}
+			_, err := ts.ParseToken(token[1], user_id)
 			if err != nil {
 				return nil, err
 			}

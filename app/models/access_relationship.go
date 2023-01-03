@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
-	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
+	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,6 +20,12 @@ import (
 type AccessRelationshipModel struct {
 	Collection *mongo.Collection
 	Session    *mongo.Session
+}
+
+type UserIds struct {
+	HeadUserId   string
+	ChildUserId  string
+	ParentUserId string
 }
 
 func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) ([]bson.M, error) {
@@ -63,45 +70,44 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(f_parent_user_id strin
 }
 
 func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, rb validators.ACLPostBody) (bson.M, error) {
-	time_util := common.TimeUtil{}
+	// time_util := common.TimeUtil{}
 	var access_list_docs []interface{}
 	access_list := rb.AccessList
-	default_child_access := []float64{102, 103, 105, 106, 107, 106, 108}
+	// default_child_access := []float64{102, 103, 105, 106, 107, 106, 108}
 	for i := 0; i < len(access_list); i++ {
 		doc, _ := arm.GetAccessRelationship(rb.ParentMemberID, access_list[i].ChildMemberId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
 		}
-		child_parent_access_relation := &sf_schemas.AccessRelationshipSchema{
-			AccessRelationshipID: uuid.NewString(),
-			ChildFamilyUserID:    access_list[i].ChildMemberId,
-			ParentFamilyUserID:   rb.ParentMemberID,
-			AccessEnum:           access_list[i].AccessEnums,
-			IsDelete:             false,
-			Audit: sf_schemas.AuditSchema{
-				CreatedAt: *time_util.CurrentTimeInUTC(),
-				CreatedBy: f_head_user_id,
-				UpdatedAt: *time_util.CurrentTimeInUTC(),
-				UpdatedBy: f_head_user_id,
-			},
+
+		u_ids := UserIds{
+			HeadUserId:   f_head_user_id,
+			ChildUserId:  access_list[i].ChildMemberId,
+			ParentUserId: rb.ParentMemberID,
+		}
+		access_relation_parent_child, err := arm.SwitchCases(u_ids, "PARENT_CHILD")
+		if err != nil {
+			return nil, err
 		}
 		if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
-			child_child_access_relation := &sf_schemas.AccessRelationshipSchema{
-				AccessRelationshipID: uuid.NewString(),
-				ChildFamilyUserID:    access_list[i].ChildMemberId,
-				ParentFamilyUserID:   access_list[i].ChildMemberId,
-				AccessEnum:           default_child_access,
-				IsDelete:             false,
-				Audit: sf_schemas.AuditSchema{
-					CreatedAt: *time_util.CurrentTimeInUTC(),
-					CreatedBy: f_head_user_id,
-					UpdatedAt: *time_util.CurrentTimeInUTC(),
-					UpdatedBy: f_head_user_id,
-				},
+			// Code for inserting child child relation
+			u_ids.ParentUserId = access_list[i].ChildMemberId
+			access_relation_child_child, err := arm.SwitchCases(u_ids, "CHILD_CHILD")
+			if err != nil {
+				return nil, err
 			}
-			access_list_docs = append(access_list_docs, child_child_access_relation)
+			access_list_docs = append(access_list_docs, access_relation_child_child)
+			if !*rb.IsParentHead {
+				// Head child relation
+				u_ids.ParentUserId = f_head_user_id
+				access_relation_head_child, err := arm.SwitchCases(u_ids, "HEAD_CHILD")
+				if err != nil {
+					return nil, err
+				}
+				access_list_docs = append(access_list_docs, access_relation_head_child)
+			}
 		}
-		access_list_docs = append(access_list_docs, child_parent_access_relation)
+		access_list_docs = append(access_list_docs, access_relation_parent_child)
 	}
 
 	// Call insert many of mongo
@@ -114,6 +120,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		}
 		fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
 	}
+
 	return nil, nil
 }
 
@@ -141,4 +148,40 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	}
 	log.Println("updated document", updatedDocument)
 	return updatedDocument, nil
+}
+
+func (arm *AccessRelationshipModel) getSchema(ids UserIds, access []float64) (*schemas.AccessRelationshipSchema, error) {
+	access_relation := &schemas.AccessRelationshipSchema{
+		AccessRelationshipID: uuid.NewString(),
+		ChildFamilyUserID:    ids.ChildUserId,
+		ParentFamilyUserID:   ids.ParentUserId,
+		AccessEnum:           access,
+		IsDelete:             false,
+		Audit: schemas.AuditSchema{
+			CreatedAt: time.Now(),
+			CreatedBy: ids.HeadUserId,
+			UpdatedAt: time.Now(),
+			UpdatedBy: ids.HeadUserId,
+		},
+	}
+	return access_relation, nil
+}
+
+func (arm *AccessRelationshipModel) SwitchCases(ids UserIds, relation string, access ...float64) (*schemas.AccessRelationshipSchema, error) {
+	switch relation {
+	case "PARENT_CHILD":
+		log.Println("Parent child")
+		access_relation, err := arm.getSchema(ids, access)
+		return access_relation, err
+	case "HEAD_CHILD":
+		log.Println("Head child")
+		access_relation, err := arm.getSchema(ids, access)
+		return access_relation, err
+	case "CHILD_CHILD":
+		log.Println("Child child")
+		access_relation, err := arm.getSchema(ids, access)
+		return access_relation, err
+	default:
+		return nil, errors.KohamError("KSE-4013")
+	}
 }
