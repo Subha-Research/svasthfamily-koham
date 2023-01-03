@@ -56,7 +56,6 @@ func (tc TokenController) Put(c *fiber.Ctx) error {
 }
 
 func (tc TokenController) Delete(c *fiber.Ctx) error {
-	// TODO:: Call service
 	f_user_id := c.Params("user_id")
 	token := c.Locals("token").(*string)
 	err := tc.IService.DeleteToken(&f_user_id, token)
