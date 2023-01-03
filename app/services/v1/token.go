@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/cache"
+	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/dto"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
@@ -30,7 +31,6 @@ func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenRespo
 	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
 	if err != nil {
 		return nil, errors.KohamError("KSE-5001")
-
 	}
 
 	ts.Model.Collection = t_coll
@@ -65,10 +65,11 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	// TODO :: Before proceeding check if token already exist
 	// for the f_user_id and if exist then do not create and
 	// return the existing token
-	database := models.Database{}
 
+	database := models.Database{}
+	time_util := common.TimeUtil{}
 	signing_key := []byte(constants.TokenSigingKey)
-	token_expiry := jwt.NewNumericDate(time.Now().Add(constants.TokenExpiryTTL * time.Hour))
+	token_expiry := jwt.NewNumericDate(time_util.CurrentTimeInUTC().Add(constants.TokenExpiryTTL * time.Hour))
 
 	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
 	if err != nil {
@@ -94,7 +95,7 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: token_expiry,
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(*time_util.CurrentTimeInUTC()),
 			Issuer:    constants.Issuer,
 		},
 	}
@@ -171,9 +172,8 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 			"id": *f_user_id,
 		}
 		return errors.KohamError("KSE-4010", error_data)
-
 	}
-	if &result.TokenKey == token {
+	if *&result.TokenKey == *token {
 		database := models.Database{}
 		t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
 		if err != nil {
@@ -185,5 +185,5 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 			return err_del
 		}
 	}
-	return nil
+	return errors.KohamError("KSE-4009")
 }

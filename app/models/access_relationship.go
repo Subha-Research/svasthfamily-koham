@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	sf_schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
@@ -63,7 +63,7 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(f_parent_user_id strin
 }
 
 func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, rb validators.ACLPostBody) (bson.M, error) {
-	// Colllection variable is set via Dependency injection from app file
+	time_util := common.TimeUtil{}
 	var access_list_docs []interface{}
 	access_list := rb.AccessList
 	default_child_access := []float64{102, 103, 105, 106, 107, 106, 108}
@@ -79,9 +79,9 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 			AccessEnum:           access_list[i].AccessEnums,
 			IsDelete:             false,
 			Audit: sf_schemas.AuditSchema{
-				CreatedAt: time.Now(),
+				CreatedAt: *time_util.CurrentTimeInUTC(),
 				CreatedBy: f_head_user_id,
-				UpdatedAt: time.Now(),
+				UpdatedAt: *time_util.CurrentTimeInUTC(),
 				UpdatedBy: f_head_user_id,
 			},
 		}
@@ -93,9 +93,9 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 				AccessEnum:           default_child_access,
 				IsDelete:             false,
 				Audit: sf_schemas.AuditSchema{
-					CreatedAt: time.Now(),
+					CreatedAt: *time_util.CurrentTimeInUTC(),
 					CreatedBy: f_head_user_id,
-					UpdatedAt: time.Now(),
+					UpdatedAt: *time_util.CurrentTimeInUTC(),
 					UpdatedBy: f_head_user_id,
 				},
 			}
@@ -119,11 +119,12 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 
 func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
 	// Colllection variable is set via Dependency injection from app file
+	time_util := common.TimeUtil{}
 	access_list := rb.Access
 	access_relation := access_list.AccessEnums
 
 	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildMemberId}, {Key: "parent_family_user_id", Value: rb.ParentMemberID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation}, {Key: "audit.updated_at", Value: time.Now()}, {Key: "audit.updated_by", Value: f_head_user_id}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation}, {Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()}, {Key: "audit.updated_by", Value: f_head_user_id}}}}
 	var updatedDocument bson.M
 	err := arm.Collection.FindOneAndUpdate(
 		context.TODO(),

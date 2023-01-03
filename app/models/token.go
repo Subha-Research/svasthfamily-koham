@@ -6,11 +6,13 @@ import (
 	"log"
 	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/dto"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,10 +22,11 @@ type TokenModel struct {
 }
 
 func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Time) (*dto.CreateTokenResponse, error) {
+	time_utils := common.TimeUtil{}
 	as := &schemas.AuditSchema{
-		CreatedAt: time.Now(),
+		CreatedAt: *time_utils.CurrentTimeInUTC(),
 		CreatedBy: f_user_id,
-		UpdatedAt: time.Now(),
+		UpdatedAt: *time_utils.CurrentTimeInUTC(),
 		UpdatedBy: f_user_id,
 	}
 	ts := &schemas.TokenSchema{
@@ -66,7 +69,7 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 	fmt.Printf("Token document %v", result)
 	gtr := dto.GetTokenResponse{}
 	gtr.TokenKey = result["token_key"].(string)
-	gtr.TokenExpiry = result["expires_at"].(time.Time)
+	gtr.TokenExpiry = result["expires_at"].(primitive.DateTime)
 	gtr.FamilyUserID = result["family_user_id"].(string)
 
 	return &gtr, nil
@@ -75,6 +78,7 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 func (tm *TokenModel) DeleteToken(f_user_id *string, token *string) error {
 	_, err := tm.Collection.DeleteOne(context.TODO(), bson.D{{Key: "family_user_id", Value: f_user_id}, {Key: "token_key", Value: token}})
 	if err != nil {
+		log.Println("Error in deleting token, returning internal service error", err)
 		return errors.KohamError("KSE-5001")
 	}
 	return nil

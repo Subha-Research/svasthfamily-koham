@@ -3,6 +3,7 @@ package schemas
 import (
 	"time"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -14,10 +15,11 @@ type AuditSchema struct {
 }
 
 func (as *AuditSchema) MarshalBSON() ([]byte, error) {
+	time_util := common.TimeUtil{}
 	if as.CreatedAt.IsZero() {
-		as.CreatedAt = time.Now()
+		as.CreatedAt = *time_util.CurrentTimeInUTC()
 	}
-	as.UpdatedAt = time.Now()
+	as.UpdatedAt = *time_util.CurrentTimeInUTC()
 	// type my AuditSchema
 	type audit AuditSchema
 	return bson.Marshal((*audit)(as))
