@@ -73,8 +73,6 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dto.GetTokenResponse, error) 
 }
 
 func (tm *TokenModel) DeleteToken(f_user_id *string, token *string) error {
-	//database := client.Database("")
-	//podcastsCollection := database.Collection("")
 	_, err := tm.Collection.DeleteOne(context.TODO(), bson.D{{Key: "family_user_id", Value: f_user_id}, {Key: "token_key", Value: token}})
 	if err != nil {
 		return errors.KohamError("KSE-5001")
