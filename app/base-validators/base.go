@@ -48,8 +48,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 			// TRY to decode JWT token
 
 			// return nil
-			ts := services.TokenService{}
-			_, err := ts.ParseToken(token[1], user_id)
+			_, err := bv.TokenService.ParseToken(token[1], user_id)
 			if err != nil {
 				return nil, err
 			}

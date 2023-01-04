@@ -76,6 +76,8 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	access_list := rb.AccessList
 	for i := 0; i < len(access_list); i++ {
 		var access_enums = access_list[i].AccessEnums
+
+		// If access already created in parent member id and child member id
 		doc, _ := arm.GetAccessRelationship(rb.ParentMemberID, access_list[i].ChildMemberId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
