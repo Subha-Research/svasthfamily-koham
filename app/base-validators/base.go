@@ -1,7 +1,6 @@
 package base_validators
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
@@ -20,13 +19,16 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	if c.Get("Content-Type") != "application/json" {
 		return nil, errors.KohamError("KSE-4001")
 	}
-	opt_param := c.Params("validate")
+	opt_param := c.Params("opt")
 	req_method := c.Method()
 	resource_type := c.Params("resource_type")
 	user_id := c.Params("user_id")
+	v_strategy, err := bv.headerValidationStrategy(resource_type, opt_param, req_method)
+	if err != nil {
+		return nil, err
+	}
 
-	if resource_type == "tokens" && opt_param == "" && (req_method == "POST" || req_method == "GET") {
-		log.Println(c.Get("x-service-id"))
+	if *v_strategy == "x-service-id" {
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {
 			return nil, errors.KohamError("KSE-4002")
@@ -36,7 +38,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		if x_service_id.String() != XServiceID {
 			return nil, errors.KohamError("KSE-4005")
 		}
-	} else if resource_type == "acls" || (resource_type == "tokens" && opt_param == "validate") || (resource_type == "tokens" && req_method == "DELETE") {
+	} else if *v_strategy == "authorization" {
 		auth := c.Get("Authorization")
 		if auth == "" {
 			return nil, errors.KohamError("KSE-4003")
@@ -45,16 +47,29 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		if token[1] == "" {
 			return nil, errors.KohamError("KSE-4004")
 		} else {
-			// TRY to decode JWT token
-
-			// return nil
-			_, err := bv.TokenService.ParseToken(token[1], user_id)
+			err := bv.TokenService.ParseToken(token[1], user_id)
 			if err != nil {
 				return nil, err
 			}
-			// return nil, nil
 		}
 		return &token[1], nil
 	}
 	return nil, nil
+}
+
+func (bv *BaseValidator) headerValidationStrategy(resource_type string, opt string, req_method string) (*string, error) {
+	var strategy string
+	switch true {
+	case resource_type == "tokens" && opt == "" && (req_method == "POST" || req_method == "GET"):
+		strategy = "x-service-id"
+	case resource_type == "acls" && opt == "head":
+		strategy = "x-service-id"
+	case resource_type == "tokens" && opt == "validate":
+		strategy = "authorization"
+	case resource_type == "tokens" && req_method == "DELETE":
+		strategy = "authorization"
+	default:
+		return nil, errors.KohamError("")
+	}
+	return &strategy, nil
 }

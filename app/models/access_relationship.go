@@ -176,6 +176,7 @@ func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
 	var default_access = maps.Keys(enums.HEAD_DEFAULT_ACCESS)
 	var access_relation *schemas.AccessRelationshipSchema
 	var err error
+
 	switch relation {
 	case "PARENT_CHILD":
 		if access != nil {

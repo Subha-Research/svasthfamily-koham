@@ -19,7 +19,8 @@ func (acl ACLController) Get(c *fiber.Ctx) error {
 func (acl ACLController) Post(c *fiber.Ctx) error {
 	// TODO:: Validate token access before inserting
 	// into database
-	// Implement DTO
+	// Implement DTO for response
+	// token := c.Locals("token")
 	f_user_id := c.Params("user_id")
 
 	aclpb := new(validators.ACLPostBody)
@@ -29,15 +30,11 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 		return errors.DefaultErrorHandler(c, fiber.NewError(400, "Body Parsing failed"))
 	}
 
-	// Request body validation
-	// CLEANUP:: Access using interface
 	err := acl.Validator.ValidateACLPostBody(*aclpb, f_user_id)
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 
-	// Call service
-	// acl_s := services.ACLService{}
 	if err := acl.Service.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}

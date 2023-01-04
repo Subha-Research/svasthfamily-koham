@@ -21,8 +21,6 @@ type TokenService struct {
 }
 
 type TokenClaims struct {
-	FUserID    string
-	AccessList []dto.AccessRelation
 	jwt.RegisteredClaims
 }
 
@@ -62,10 +60,6 @@ func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 }
 
 func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
-	// TODO :: Before proceeding check if token already exist
-	// for the f_user_id and if exist then do not create and
-	// return the existing token
-
 	err := ts.DeleteToken(&f_user_id, nil)
 	if err != nil {
 		log.Println("Error in deleting token in create token API", err)
@@ -81,12 +75,6 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		return nil, err
 	}
 	ts.ARModel.Collection = ar_coll
-	all_access_relations, err := ts.ARModel.GetAllAccessRelationship(f_user_id)
-	if err != nil {
-		return nil, err
-	}
-	dto := dto.AccessRelationshipDTO{}
-	acl_dto, err := dto.FormatAllAccessRelationship(all_access_relations)
 
 	if err != nil {
 		log.Println("Error in formatting access relationship data", err)
@@ -95,8 +83,6 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 
 	// Create the claims
 	claims := TokenClaims{
-		f_user_id,
-		acl_dto,
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: token_expiry,
@@ -126,25 +112,23 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	return data, nil
 }
 
-func (ts *TokenService) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
+func (ts *TokenService) ParseToken(token_string string, f_user_id string) error {
 	token, err := jwt.ParseWithClaims(token_string, &TokenClaims{}, func(*jwt.Token) (secret interface{}, err error) {
-		// TODO:: Move this to constants
 		return []byte(constants.TokenSigingKey), nil
 	})
 	if err != nil {
-		return nil, errors.KohamError("KSE-4009")
+		return errors.KohamError("KSE-4009")
 	}
 	claims, ok := token.Claims.(*TokenClaims)
 	if ok && token.Valid {
-		// TODO:: Use log instead of fmt
-		// fmt.Printf("%v %v", claims.FUserID, claims.RegisteredClaims.Issuer)
-		if claims.FUserID != f_user_id && claims.RegisteredClaims.Issuer == constants.Issuer {
-			return nil, errors.KohamError("KSE-4009")
+		if claims.RegisteredClaims.Issuer == constants.Issuer {
+			log.Println("Token issuer did not match")
+			return errors.KohamError("KSE-4009")
 		}
 	} else {
-		return nil, errors.KohamError("KSE-4009")
+		return errors.KohamError("KSE-4009")
 	}
-	return claims.AccessList, nil
+	return nil
 }
 func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
 	db_token_key, err := ts.GetToken(f_user_id)
@@ -152,10 +136,17 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		return nil, err
 	}
 	if *db_token_key != *token {
+		log.Printf("Given token %s did not match with database", *token)
 		return nil, errors.KohamError("KSE-4009")
 	}
-	acesslist, _ := ts.ParseToken(*token, f_user_id)
-	for _, v := range acesslist {
+	all_access_relations, err := ts.ARModel.GetAllAccessRelationship(f_user_id)
+	acl_dto := dto.AccessRelationshipDTO{}
+	if err != nil {
+		return nil, err
+	}
+	access_list, err := acl_dto.FormatAllAccessRelationship(all_access_relations)
+
+	for _, v := range access_list {
 		if v.ChildMemberID == rb.ChildmemberID {
 			for _, e := range v.AccessEnums.([]interface{}) {
 				if e.(float64) == rb.AccessEnum {
@@ -170,6 +161,7 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 	return nil, errors.KohamError("KSE-4009")
 }
 
+// *token to this function could be nil, in case getting called from CreateToken
 func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 	result, err := ts.GetTokenDataFromDb(*f_user_id)
 	if err != nil {
@@ -184,14 +176,15 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 	if err != nil {
 		return errors.KohamError("KSE-5001")
 	}
-	ts.Model.Collection = t_coll
 
+	ts.Model.Collection = t_coll
 	var delete_token_key *string
 	if token == nil {
 		delete_token_key = &result.TokenKey
 	} else if token != nil && *&result.TokenKey == *token {
 		delete_token_key = token
 	} else {
+		log.Printf("Given token %s did not match with database", *token)
 		return errors.KohamError("KSE-4009")
 	}
 	err_del := ts.Model.DeleteToken(f_user_id, delete_token_key)
