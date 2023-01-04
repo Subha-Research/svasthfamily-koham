@@ -32,7 +32,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
 	}
 
 	// Validate access enums
-	d := enums.Head_Default_Accesses
+	d := enums.HEAD_DEFAULT_ACCESS
 	for k := range d {
 		if k == rb.AccessEnum {
 			return nil

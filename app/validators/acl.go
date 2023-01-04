@@ -21,7 +21,7 @@ var ExtractTagName = func(fld reflect.StructField) string {
 
 type ChildMemberAccess struct {
 	ChildMemberId string    `json:"child_member_id" validate:"required,uuid4_rfc4122"`
-	AccessEnums   []float64 `json:"access_enums" validate:"required,min=1,dive,number"`
+	AccessEnums   []float64 `json:"access_enums" validate:"omitempty,min=1,dive,number"`
 }
 
 type ACLPostBody struct {
@@ -53,7 +53,7 @@ func (av *ACLValidator) validateAccess(a_enums []float64) bool {
 	// Run a loop to build freq_hash_map
 	freq_hash_map := map[float64]int{}
 
-	for k := range enums.Head_Default_Accesses {
+	for k := range enums.CHILD_DEFAULT_ACCESS {
 		freq_hash_map[k] = 1
 	}
 
@@ -108,11 +108,13 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string)
 			}
 		}
 		access_enums := access_list[i].AccessEnums
-		is_all_access_present := av.validateAccess(access_enums)
+		if access_enums != nil {
+			is_all_access_present := av.validateAccess(access_enums)
 
-		if !is_all_access_present {
-			error_data["key"] = "access_enums"
-			return errors.KohamError("KSE-4006", error_data)
+			if !is_all_access_present {
+				error_data["key"] = "access_enums"
+				return errors.KohamError("KSE-4006", error_data)
+			}
 		}
 	}
 	return nil

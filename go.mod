@@ -12,6 +12,7 @@ require (
 	github.com/knadh/koanf v1.4.4
 	github.com/stretchr/testify v1.8.1
 	go.mongodb.org/mongo-driver v1.11.1
+	golang.org/x/exp v0.0.0-20221230185412-738e83a70c30
 )
 
 require (

@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/exp/maps"
 )
 
 type AccessRelationshipModel struct {
@@ -22,7 +23,7 @@ type AccessRelationshipModel struct {
 	Session    *mongo.Session
 }
 
-type UserIds struct {
+type UserIDs struct {
 	HeadUserId   string
 	ChildUserId  string
 	ParentUserId string
@@ -73,26 +74,26 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	// time_util := common.TimeUtil{}
 	var access_list_docs []interface{}
 	access_list := rb.AccessList
-	// default_child_access := []float64{102, 103, 105, 106, 107, 106, 108}
 	for i := 0; i < len(access_list); i++ {
+		var access_enums = access_list[i].AccessEnums
 		doc, _ := arm.GetAccessRelationship(rb.ParentMemberID, access_list[i].ChildMemberId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
 		}
 
-		u_ids := UserIds{
+		u_ids := UserIDs{
 			HeadUserId:   f_head_user_id,
 			ChildUserId:  access_list[i].ChildMemberId,
 			ParentUserId: rb.ParentMemberID,
 		}
-		access_relation_parent_child, err := arm.SwitchCases(u_ids, "PARENT_CHILD")
+		access_relation_parent_child, err := arm.getAccessRelation(u_ids, "PARENT_CHILD", *rb.IsParentHead, access_enums)
 		if err != nil {
 			return nil, err
 		}
 		if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
-			// Code for inserting child child relation
+			//Inserting child child relation
 			u_ids.ParentUserId = access_list[i].ChildMemberId
-			access_relation_child_child, err := arm.SwitchCases(u_ids, "CHILD_CHILD")
+			access_relation_child_child, err := arm.getAccessRelation(u_ids, "CHILD_CHILD", *rb.IsParentHead, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -100,7 +101,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 			if !*rb.IsParentHead {
 				// Head child relation
 				u_ids.ParentUserId = f_head_user_id
-				access_relation_head_child, err := arm.SwitchCases(u_ids, "HEAD_CHILD")
+				access_relation_head_child, err := arm.getAccessRelation(u_ids, "HEAD_CHILD", *rb.IsParentHead, nil)
 				if err != nil {
 					return nil, err
 				}
@@ -150,7 +151,7 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	return updatedDocument, nil
 }
 
-func (arm *AccessRelationshipModel) getSchema(ids UserIds, access []float64) (*schemas.AccessRelationshipSchema, error) {
+func (arm *AccessRelationshipModel) getSchema(ids UserIDs, access []float64) (*schemas.AccessRelationshipSchema, error) {
 	access_relation := &schemas.AccessRelationshipSchema{
 		AccessRelationshipID: uuid.NewString(),
 		ChildFamilyUserID:    ids.ChildUserId,
@@ -167,21 +168,26 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIds, access []float64) (*s
 	return access_relation, nil
 }
 
-func (arm *AccessRelationshipModel) SwitchCases(ids UserIds, relation string, access ...float64) (*schemas.AccessRelationshipSchema, error) {
+func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
+	relation string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, error) {
+
+	var default_access = maps.Keys(enums.HEAD_DEFAULT_ACCESS)
+	var access_relation *schemas.AccessRelationshipSchema
+	var err error
 	switch relation {
 	case "PARENT_CHILD":
-		log.Println("Parent child")
-		access_relation, err := arm.getSchema(ids, access)
-		return access_relation, err
+		if access != nil {
+			default_access = access
+		}
+		access_relation, err = arm.getSchema(ids, default_access)
 	case "HEAD_CHILD":
-		log.Println("Head child")
-		access_relation, err := arm.getSchema(ids, access)
-		return access_relation, err
+		default_access = maps.Keys(enums.HEAD_DEFAULT_ACCESS)
+		access_relation, err = arm.getSchema(ids, default_access)
 	case "CHILD_CHILD":
-		log.Println("Child child")
-		access_relation, err := arm.getSchema(ids, access)
-		return access_relation, err
+		default_access = maps.Keys(enums.CHILD_DEFAULT_ACCESS)
+		access_relation, err = arm.getSchema(ids, default_access)
 	default:
 		return nil, errors.KohamError("KSE-4013")
 	}
+	return access_relation, err
 }
