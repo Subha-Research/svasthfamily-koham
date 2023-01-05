@@ -5,13 +5,13 @@ import (
 
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
-	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
+	"github.com/Subha-Research/svasthfamily-koham/app/interfaces"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 type BaseValidator struct {
-	TokenService *services.TokenService
+	ITokenService interfaces.ITokenService
 }
 
 const XServiceID = "d8c3eed5-8eda-441e-bcc1-16fab23b3ab7"
@@ -48,7 +48,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		if token[1] == "" {
 			return nil, errors.KohamError("KSE-4004")
 		} else {
-			err := bv.TokenService.ParseToken(token[1], user_id)
+			err := bv.ITokenService.ParseToken(token[1], user_id)
 			if err != nil {
 				return nil, err
 			}

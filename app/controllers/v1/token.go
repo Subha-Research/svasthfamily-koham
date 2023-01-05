@@ -22,7 +22,7 @@ func (tc TokenController) Post(c *fiber.Ctx) error {
 	opt_param := c.Params("validate")
 
 	if opt_param == "validate" {
-		tokenrb := new(validators.TokenRequestBody)
+		tokenrb := new(validators.ValidateTokenRB)
 		err := c.BodyParser(tokenrb)
 		if err != nil {
 			// If any error in body parsing of fiber

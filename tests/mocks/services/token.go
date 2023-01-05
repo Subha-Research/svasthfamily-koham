@@ -49,7 +49,7 @@ func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) e
 	return nil
 }
 
-func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
+func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
 	return nil, nil
 }
 

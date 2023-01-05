@@ -58,8 +58,8 @@ func TestCreateToken(t *testing.T) {
 			},
 			BaseController: &controllers.BaseController{
 				ACLController: &controllers.ACLController{
-					Validator: validators.ACLValidator{},
-					Service: services.ACLService{
+					Validator: &validators.ACLValidator{},
+					Service: &services.ACLService{
 						Model: &models.AccessRelationshipModel{},
 					},
 				},

@@ -24,4 +24,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"KSE-4012": {404, "KSE-4012", "No access relationship found for family user id :id:"},
 	"KSE-4013": {404, "KSE-4013", "Relationship didn't established"},
 	"KSE-4014": {404, "KSE-4014", "404 URL not found"},
+	"KSE-4015": {405, "KSE-4015", "Invalid operation"},
 }

@@ -79,33 +79,8 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string)
 		}
 	}
 
-	// role_enum := aclpb.RoleEnum
-	// is_role_valid, role_key := av.validateRole(role_enum)
-	// if !is_role_valid {
-	// 	error_data["key"] = "role"
-	// 	return errors.KohamError("KSE-4006", error_data)
-	// }
-
-	// Validate if we support the given role and access received in request
-	// LATER CLEANUP:: validate from service by fetching from cache / database
-	// Validate all child_member_id and access_enums
-	// Check if child_member_id is in uuid format or not
-	// and access enums are in supported list
-
 	access_list := aclpb.AccessList
 	for i := 0; i < len(access_list); i++ {
-		// child_member_id := access_list[i].ChildMemberId
-		// c_id, err := uuid.Parse(child_member_id)
-		// if err != nil {
-		// 	error_data["key"] = "child_member_id"
-		// 	return errors.KohamError("KSE-4006", error_data)
-		// }
-
-		// if role_key != "FAMILY_HEAD" {
-		// 	if c_id.String() == f_user_id {
-		// 		return errors.KohamError("KSE-4008")
-		// 	}
-		// }
 		access_enums := access_list[i].AccessEnums
 		if access_enums != nil {
 			is_all_access_present := av.validateAccess(access_enums)
@@ -146,8 +121,17 @@ func (av *ACLValidator) ValidateACLPutBody(aclputb ACLPutBody, f_user_id string)
 		return errors.KohamError("KSE-4006", error_data)
 	}
 
-	if c_id.String() == f_user_id || p_id.String() == f_user_id {
+	// All Three IDs can not be same
+	// During update
+	// Cases:
+	// 1. Head wants to update his own access, not possible, reach support.
+	// 2. Head wants to update a member's access like revoke some access which member only manages. Possible
+	// 3. Head wants to update a child member access which has another parent apart from head. Possible
+	if c_id.String() == f_user_id && p_id.String() == f_user_id && c_id.String() == p_id.String() {
 		return errors.KohamError("KSE-4008")
+	}
+	if p_id.String() == f_user_id {
+		return errors.KohamError("KSE-4015")
 	}
 
 	access_enums := access.AccessEnums

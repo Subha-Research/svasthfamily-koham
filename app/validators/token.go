@@ -13,12 +13,12 @@ import (
 type TokenValidator struct {
 }
 
-type TokenRequestBody struct {
+type ValidateTokenRB struct {
 	ChildmemberID string  `json:"child_member_id" validate:"required,uuid4_rfc4122"`
 	AccessEnum    float64 `json:"access_enum" validate:"required,number"`
 }
 
-func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
+func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 	err := validate.Struct(rb)
 	error_data := map[string]string{
 		"key": "role",

@@ -12,6 +12,7 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TokenService struct {
@@ -25,13 +26,13 @@ type TokenClaims struct {
 }
 
 func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
-	database := models.Database{}
-	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-	if err != nil {
-		return nil, errors.KohamError("KSE-5001")
-	}
+	// database := models.Database{}
+	// t_coll, _, err := database.GetCollectionAndSession(constants.TOKEN_COLLECTION)
+	// if err != nil {
+	// 	return nil, errors.KohamError("KSE-5001")
+	// }
 
-	ts.Model.Collection = t_coll
+	// ts.Model.Collection = t_coll
 	result, err := ts.Model.GetToken(f_user_id)
 	if err != nil {
 		error_data := map[string]string{
@@ -65,21 +66,10 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		log.Println("Error in deleting token in create token API", err)
 	}
 
-	database := models.Database{}
+	// database := models.Database{}
 	time_util := common.TimeUtil{}
 	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time_util.CurrentTimeInUTC().Add(constants.TokenExpiryTTL * time.Hour))
-
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACL_COLLECTION)
-	if err != nil {
-		return nil, err
-	}
-	ts.ARModel.Collection = ar_coll
-
-	if err != nil {
-		log.Println("Error in formatting access relationship data", err)
-		return nil, err
-	}
 
 	// Create the claims
 	claims := TokenClaims{
@@ -97,12 +87,6 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		log.Println("Error while signing token", err)
 		return nil, errors.KohamError("KSE-5001")
 	}
-
-	token_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-	if err != nil {
-		return nil, err
-	}
-	ts.Model.Collection = token_coll
 	data, insert_err := ts.Model.InsertToken(f_user_id, ss, token_expiry.Time)
 	if insert_err != nil {
 		return nil, insert_err
@@ -130,7 +114,7 @@ func (ts *TokenService) ParseToken(token_string string, f_user_id string) error 
 	}
 	return nil
 }
-func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
+func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
 	db_token_key, err := ts.GetToken(f_user_id)
 	if err != nil {
 		return nil, err
@@ -148,7 +132,7 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 
 	for _, v := range access_list {
 		if v.ChildMemberID == rb.ChildmemberID {
-			for _, e := range v.AccessEnums.([]interface{}) {
+			for _, e := range v.AccessEnums.(primitive.A) {
 				if e.(float64) == rb.AccessEnum {
 					// Build Response
 					vtr := dto.ValidateTokenResponse{}
@@ -171,13 +155,13 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		return errors.KohamError("KSE-4010", error_data)
 	}
 
-	database := models.Database{}
-	t_coll, _, err := database.GetCollectionAndSession(constants.TokenCollection)
-	if err != nil {
-		return errors.KohamError("KSE-5001")
-	}
+	// database := models.Database{}
+	// t_coll, _, err := database.GetCollectionAndSession(constants.TOKEN_COLLECTION)
+	// if err != nil {
+	// 	return errors.KohamError("KSE-5001")
+	// }
 
-	ts.Model.Collection = t_coll
+	// ts.Model.Collection = t_coll
 	var delete_token_key *string
 	if token == nil {
 		delete_token_key = &result.TokenKey

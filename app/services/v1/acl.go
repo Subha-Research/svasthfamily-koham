@@ -8,9 +8,9 @@ import (
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 )
 
-type IACLService interface {
-	CreateSFRelationship(string, validators.ACLPostBody) error
-}
+// type IACLService interface {
+// 	CreateSFRelationship(string, validators.ACLPostBody) error
+// }
 
 type ACLService struct {
 	Model *models.AccessRelationshipModel
@@ -18,13 +18,6 @@ type ACLService struct {
 
 func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *string, rb validators.ACLPostBody) error {
 	var is_head_head_relation = true
-	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACL_COLLECTION)
-	if err != nil {
-		log.Fatal("Errro in  getting collection and session. Stopping server", err)
-	}
-	// Dependency injection pattern
-	acl_s.Model.Collection = ar_coll
 	if token != nil {
 		_, err_get_doc_head := acl_s.Model.GetAccessRelationship(f_user_id, f_user_id)
 		if err_get_doc_head != nil {
@@ -63,6 +56,5 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb vali
 	if err_update_doc != nil {
 		return err_update_doc
 	}
-
 	return nil
 }
