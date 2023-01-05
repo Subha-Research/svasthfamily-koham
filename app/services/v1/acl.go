@@ -3,14 +3,9 @@ package services
 import (
 	"log"
 
-	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 )
-
-// type IACLService interface {
-// 	CreateSFRelationship(string, validators.ACLPostBody) error
-// }
 
 type ACLService struct {
 	Model *models.AccessRelationshipModel
@@ -45,13 +40,6 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *strin
 }
 
 func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) error {
-	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACL_COLLECTION)
-	if err != nil {
-		log.Fatal("Error in  getting collection and session. Stopping server", err)
-	}
-	// Dependency injection pattern
-	acl_s.Model.Collection = ar_coll
 	_, err_update_doc := acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
 	if err_update_doc != nil {
 		return err_update_doc

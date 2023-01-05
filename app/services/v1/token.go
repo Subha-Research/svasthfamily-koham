@@ -26,13 +26,6 @@ type TokenClaims struct {
 }
 
 func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
-	// database := models.Database{}
-	// t_coll, _, err := database.GetCollectionAndSession(constants.TOKEN_COLLECTION)
-	// if err != nil {
-	// 	return nil, errors.KohamError("KSE-5001")
-	// }
-
-	// ts.Model.Collection = t_coll
 	result, err := ts.Model.GetToken(f_user_id)
 	if err != nil {
 		error_data := map[string]string{
@@ -66,7 +59,6 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 		log.Println("Error in deleting token in create token API", err)
 	}
 
-	// database := models.Database{}
 	time_util := common.TimeUtil{}
 	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time_util.CurrentTimeInUTC().Add(constants.TokenExpiryTTL * time.Hour))
@@ -155,13 +147,6 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		return errors.KohamError("KSE-4010", error_data)
 	}
 
-	// database := models.Database{}
-	// t_coll, _, err := database.GetCollectionAndSession(constants.TOKEN_COLLECTION)
-	// if err != nil {
-	// 	return errors.KohamError("KSE-5001")
-	// }
-
-	// ts.Model.Collection = t_coll
 	var delete_token_key *string
 	if token == nil {
 		delete_token_key = &result.TokenKey
