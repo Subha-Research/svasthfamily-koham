@@ -120,10 +120,10 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 	if err != nil {
 		return nil, err
 	}
-	access_list, err := acl_dto.FormatAllAccessRelationship(all_access_relations)
+	access_list, _ := acl_dto.FormatAllAccessRelationship(all_access_relations)
 
 	for _, v := range access_list {
-		if v.ChildMemberID == rb.ChildmemberID {
+		if v.ChildUserID == rb.ChildUserID {
 			for _, e := range v.AccessEnums.(primitive.A) {
 				if e.(float64) == rb.AccessEnum {
 					// Build Response

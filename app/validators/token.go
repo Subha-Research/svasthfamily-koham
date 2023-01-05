@@ -14,8 +14,8 @@ type TokenValidator struct {
 }
 
 type ValidateTokenRB struct {
-	ChildmemberID string  `json:"child_member_id" validate:"required,uuid4_rfc4122"`
-	AccessEnum    float64 `json:"access_enum" validate:"required,number"`
+	ChildUserID string  `json:"child_user_id" validate:"required,uuid4_rfc4122"`
+	AccessEnum  float64 `json:"access_enum" validate:"required,number"`
 }
 
 func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {

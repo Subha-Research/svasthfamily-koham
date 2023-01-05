@@ -83,16 +83,16 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		var access_enums = access_list[i].AccessEnums
 		var err error
 		var access_relation_parent_child *schemas.AccessRelationshipSchema
-		// If access already created in parent member id and child member id
-		doc, _ := arm.GetAccessRelationship(nil, rb.ParentMemberID, access_list[i].ChildMemberId)
+		// If access already created in parent user id and child user id
+		doc, _ := arm.GetAccessRelationship(nil, rb.ParentUserID, access_list[i].ChildUserId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
 		}
 
 		u_ids := UserIDs{
 			HeadUserId:   f_head_user_id,
-			ChildUserId:  access_list[i].ChildMemberId,
-			ParentUserId: rb.ParentMemberID,
+			ChildUserId:  access_list[i].ChildUserId,
+			ParentUserId: rb.ParentUserID,
 		}
 		if is_head_head && access_enums == nil {
 			access_relation_parent_child, err = arm.getAccessRelation(u_ids, "HEAD_HEAD", *rb.IsParentHead, access_enums)
@@ -105,7 +105,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		}
 		if !is_head_head {
 			//Inserting child child relation
-			u_ids.ParentUserId = access_list[i].ChildMemberId
+			u_ids.ParentUserId = access_list[i].ChildUserId
 			access_relation_child_child, err := arm.getAccessRelation(u_ids, "CHILD_CHILD", *rb.IsParentHead, nil)
 			if err != nil {
 				return nil, err
@@ -142,7 +142,7 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	access_list := rb.Access
 	access_relation := access_list.AccessEnums
 
-	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildMemberId}, {Key: "parent_family_user_id", Value: rb.ParentMemberID}}
+	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildUserId}, {Key: "parent_family_user_id", Value: rb.ParentUserID}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation}, {Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()}, {Key: "audit.updated_by", Value: f_head_user_id}}}}
 	var updatedDocument bson.M
 	err := arm.Collection.FindOneAndUpdate(
