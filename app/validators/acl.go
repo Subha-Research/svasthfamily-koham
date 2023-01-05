@@ -7,7 +7,6 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	validator "github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 var validate = validator.New()
@@ -39,14 +38,14 @@ type ACLPutBody struct {
 type ACLValidator struct {
 }
 
-func (av *ACLValidator) validateRole(r_enum int) (bool, string) {
-	for k, v := range constants.ROLES {
-		if r_enum == k {
-			return true, v
-		}
-	}
-	return false, ""
-}
+// func (av *ACLValidator) validateRole(r_enum int) (bool, string) {
+// 	for k, v := range constants.ROLES {
+// 		if r_enum == k {
+// 			return true, v
+// 		}
+// 	}
+// 	return false, ""
+// }
 
 func (av *ACLValidator) validateAccess(a_enums []float64) bool {
 	// Run a loop to build freq_hash_map
@@ -109,32 +108,11 @@ func (av *ACLValidator) ValidateACLPutBody(aclputb ACLPutBody, f_user_id string)
 		}
 	}
 	access := aclputb.Access
-	child_member_id := access.ChildMemberId
-	c_id, err := uuid.Parse(child_member_id)
-	if err != nil {
-		error_data["key"] = "child_member_id"
-		return errors.KohamError("KSE-4006", error_data)
-	}
-	p_id, err := uuid.Parse(aclputb.ParentMemberID)
-	if err != nil {
-		error_data["key"] = "parent_member_id"
-		return errors.KohamError("KSE-4006", error_data)
-	}
-
-	// All Three IDs can not be same
-	// During update
-	// Cases:
-	// 1. Head wants to update his own access, not possible, reach support.
-	// 2. Head wants to update a member's access like revoke some access which member only manages. Possible
-	// 3. Head wants to update a child member access which has another parent apart from head. Possible
-	if c_id.String() == f_user_id && p_id.String() == f_user_id && c_id.String() == p_id.String() {
-		return errors.KohamError("KSE-4008")
-	}
-	if p_id.String() == f_user_id {
-		return errors.KohamError("KSE-4015")
-	}
-
 	access_enums := access.AccessEnums
+	if access_enums == nil {
+		error_data["key"] = "access_enums"
+		return errors.KohamError("KSE-4006", error_data)
+	}
 	is_all_access_present := av.validateAccess(access_enums)
 
 	if !is_all_access_present {

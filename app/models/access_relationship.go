@@ -53,11 +53,15 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 	return results, nil
 }
 
-func (arm *AccessRelationshipModel) GetAccessRelationship(f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+func (arm *AccessRelationshipModel) GetAccessRelationship(f_head_user_id *string, f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+	var filter = bson.D{{Key: "parent_family_user_id", Value: f_parent_user_id}, {Key: "child_family_user_id", Value: f_child_user_id}}
+	if f_head_user_id != nil {
+		filter = append(filter, bson.E{Key: "head_family_user_id", Value: f_head_user_id})
+	}
 	var result bson.M
 	err := arm.Collection.FindOne(
 		context.TODO(),
-		bson.D{{Key: "parent_family_user_id", Value: f_parent_user_id}, {Key: "child_family_user_id", Value: f_child_user_id}},
+		filter,
 	).Decode(&result)
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in
@@ -80,7 +84,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		var err error
 		var access_relation_parent_child *schemas.AccessRelationshipSchema
 		// If access already created in parent member id and child member id
-		doc, _ := arm.GetAccessRelationship(rb.ParentMemberID, access_list[i].ChildMemberId)
+		doc, _ := arm.GetAccessRelationship(nil, rb.ParentMemberID, access_list[i].ChildMemberId)
 		if doc != nil {
 			return doc, errors.KohamError("KSE-4009")
 		}
