@@ -55,7 +55,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb vali
 	database := models.Database{}
 	ar_coll, _, err := database.GetCollectionAndSession(constants.ACL_COLLECTION)
 	if err != nil {
-		log.Fatal("Errro in  getting collection and session. Stopping server", err)
+		log.Fatal("Error in  getting collection and session. Stopping server", err)
 	}
 	// Dependency injection pattern
 	acl_s.Model.Collection = ar_coll
