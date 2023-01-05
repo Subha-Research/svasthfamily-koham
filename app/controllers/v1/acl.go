@@ -20,7 +20,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 	// TODO:: Validate token access before inserting
 	// into database
 	// Implement DTO for response
-	// token := c.Locals("token")
+	token := c.Locals("token").(*string)
 	f_user_id := c.Params("user_id")
 
 	aclpb := new(validators.ACLPostBody)
@@ -35,7 +35,7 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 		return errors.DefaultErrorHandler(c, err)
 	}
 
-	if err := acl.Service.CreateAccessRelationship(f_user_id, *aclpb); err != nil {
+	if err := acl.Service.CreateAccessRelationship(f_user_id, token, *aclpb); err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
 	return c.Status(fiber.StatusOK).SendString("POST family ACL")

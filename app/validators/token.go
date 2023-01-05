@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"github.com/Subha-Research/svasthfamily-koham/app/enums"
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	validator "github.com/go-playground/validator/v10"
 )
@@ -32,7 +32,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
 	}
 
 	// Validate access enums
-	d := enums.HEAD_DEFAULT_ACCESS
+	d := constants.HEAD_DEFAULT_ACCESS
 	for k := range d {
 		if k == rb.AccessEnum {
 			return nil

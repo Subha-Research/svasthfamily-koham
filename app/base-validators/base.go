@@ -3,6 +3,7 @@ package base_validators
 import (
 	"strings"
 
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/gofiber/fiber/v2"
@@ -23,12 +24,12 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	req_method := c.Method()
 	resource_type := c.Params("resource_type")
 	user_id := c.Params("user_id")
-	v_strategy, err := bv.headerValidationStrategy(resource_type, opt_param, req_method)
+	strategy, err := bv.headerValidationStrategy(resource_type, opt_param, req_method)
 	if err != nil {
 		return nil, err
 	}
 
-	if *v_strategy == "x-service-id" {
+	if *strategy == constants.HEADER_VALIDATOR_STRATEGY["service"] {
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
 		if err != nil {
 			return nil, errors.KohamError("KSE-4002")
@@ -38,7 +39,7 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 		if x_service_id.String() != XServiceID {
 			return nil, errors.KohamError("KSE-4005")
 		}
-	} else if *v_strategy == "authorization" {
+	} else if *strategy == constants.HEADER_VALIDATOR_STRATEGY["authorization"] {
 		auth := c.Get("Authorization")
 		if auth == "" {
 			return nil, errors.KohamError("KSE-4003")
@@ -61,15 +62,17 @@ func (bv *BaseValidator) headerValidationStrategy(resource_type string, opt stri
 	var strategy string
 	switch true {
 	case resource_type == "tokens" && opt == "" && (req_method == "POST" || req_method == "GET"):
-		strategy = "x-service-id"
+		strategy = constants.HEADER_VALIDATOR_STRATEGY["service"]
 	case resource_type == "acls" && opt == "head":
-		strategy = "x-service-id"
+		strategy = constants.HEADER_VALIDATOR_STRATEGY["service"]
 	case resource_type == "tokens" && opt == "validate":
-		strategy = "authorization"
+		strategy = constants.HEADER_VALIDATOR_STRATEGY["authorization"]
 	case resource_type == "tokens" && req_method == "DELETE":
-		strategy = "authorization"
+		strategy = constants.HEADER_VALIDATOR_STRATEGY["authorization"]
+	case resource_type == "acls" && opt == "":
+		strategy = constants.HEADER_VALIDATOR_STRATEGY["authorization"]
 	default:
-		return nil, errors.KohamError("")
+		return nil, errors.KohamError("KSE-4014")
 	}
 	return &strategy, nil
 }

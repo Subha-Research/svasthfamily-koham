@@ -70,7 +70,7 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	signing_key := []byte(constants.TokenSigingKey)
 	token_expiry := jwt.NewNumericDate(time_util.CurrentTimeInUTC().Add(constants.TokenExpiryTTL * time.Hour))
 
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
+	ar_coll, _, err := database.GetCollectionAndSession(constants.ACL_COLLECTION)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (ts *TokenService) ParseToken(token_string string, f_user_id string) error 
 	}
 	claims, ok := token.Claims.(*TokenClaims)
 	if ok && token.Valid {
-		if claims.RegisteredClaims.Issuer == constants.Issuer {
+		if claims.RegisteredClaims.Issuer != constants.Issuer {
 			log.Println("Token issuer did not match")
 			return errors.KohamError("KSE-4009")
 		}
