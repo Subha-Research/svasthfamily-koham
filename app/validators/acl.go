@@ -38,15 +38,6 @@ type ACLPutBody struct {
 type ACLValidator struct {
 }
 
-// func (av *ACLValidator) validateRole(r_enum int) (bool, string) {
-// 	for k, v := range constants.ROLES {
-// 		if r_enum == k {
-// 			return true, v
-// 		}
-// 	}
-// 	return false, ""
-// }
-
 func (av *ACLValidator) validateAccess(a_enums []float64) bool {
 	// Run a loop to build freq_hash_map
 	freq_hash_map := map[float64]int{}
