@@ -8,6 +8,7 @@ import (
 
 	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
+	"github.com/Subha-Research/svasthfamily-koham/app/dto"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -75,18 +76,22 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(f_head_user_id *string
 	return result, nil
 }
 
-func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, is_head_head bool, rb validators.ACLPostBody) (bson.M, error) {
+func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, is_head_head bool, rb validators.ACLPostBody) (*[]dto.CreateACLDTO, error) {
 	// time_util := common.TimeUtil{}
 	var access_list_docs []interface{}
+	var dto_response_array []dto.CreateACLDTO
+
 	access_list := rb.AccessList
 	for i := 0; i < len(access_list); i++ {
 		var access_enums = access_list[i].AccessEnums
 		var err error
 		var access_relation_parent_child *schemas.AccessRelationshipSchema
+		var dto_response *dto.CreateACLDTO
+
 		// If access already created in parent user id and child user id
 		doc, _ := arm.GetAccessRelationship(nil, rb.ParentUserID, access_list[i].ChildUserId)
 		if doc != nil {
-			return doc, errors.KohamError("KSE-4009")
+			return nil, errors.KohamError("KSE-4009")
 		}
 
 		u_ids := UserIDs{
@@ -95,30 +100,35 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 			ParentUserId: rb.ParentUserID,
 		}
 		if is_head_head && access_enums == nil {
-			access_relation_parent_child, err = arm.getAccessRelation(u_ids, "HEAD_HEAD", *rb.IsParentHead, access_enums)
+			access_relation_parent_child, dto_response, err = arm.getAccessRelation(u_ids, "HEAD_HEAD", *rb.IsParentHead, access_enums)
 		} else {
-			access_relation_parent_child, err = arm.getAccessRelation(u_ids, "PARENT_CHILD", *rb.IsParentHead, access_enums)
+			access_relation_parent_child, dto_response, err = arm.getAccessRelation(u_ids, "PARENT_CHILD", *rb.IsParentHead, access_enums)
 		}
 		access_list_docs = append(access_list_docs, access_relation_parent_child)
+		dto_response_array = append(dto_response_array, *dto_response)
 		if err != nil {
 			return nil, err
 		}
 		if !is_head_head {
 			//Inserting child child relation
 			u_ids.ParentUserId = access_list[i].ChildUserId
-			access_relation_child_child, err := arm.getAccessRelation(u_ids, "CHILD_CHILD", *rb.IsParentHead, nil)
+			access_relation_child_child, dto_c_c, err := arm.getAccessRelation(u_ids, "CHILD_CHILD", *rb.IsParentHead, nil)
 			if err != nil {
 				return nil, err
 			}
 			access_list_docs = append(access_list_docs, access_relation_child_child)
+			dto_response_array = append(dto_response_array, *dto_c_c)
+
 			if !*rb.IsParentHead {
 				// Head child relation
 				u_ids.ParentUserId = f_head_user_id
-				access_relation_head_child, err := arm.getAccessRelation(u_ids, "HEAD_CHILD", *rb.IsParentHead, nil)
+				access_relation_head_child, dto_h_c, err := arm.getAccessRelation(u_ids, "HEAD_CHILD", *rb.IsParentHead, nil)
 				if err != nil {
 					return nil, err
 				}
 				access_list_docs = append(access_list_docs, access_relation_head_child)
+				dto_response_array = append(dto_response_array, *dto_h_c)
+
 			}
 		}
 	}
@@ -129,11 +139,12 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		res, err := arm.Collection.InsertMany(context.TODO(), access_list_docs, opts)
 		if err != nil {
 			log.Println("Error in inserting access relation", err)
-			return nil, err
+			return nil, errors.KohamError("KSE-5001")
 		}
 		fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
 	}
-	return nil, nil
+
+	return &dto_response_array, nil
 }
 
 func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
@@ -163,7 +174,7 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 }
 
 func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
-	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, error) {
+	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dto.CreateACLDTO, error) {
 
 	access_relation := &schemas.AccessRelationshipSchema{
 		AccessRelationshipID: uuid.NewString(),
@@ -181,34 +192,44 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
 			UpdatedBy: ids.HeadUserId,
 		},
 	}
-	return access_relation, nil
+	caclr := &dto.CreateACLDTO{
+		AccessRelationshipID: access_relation.AccessRelationshipID,
+		HeadUserId:           access_relation.HeadFamilyUserID,
+		ParentuserId:         access_relation.ParentFamilyUserID,
+		ChildUserID:          access_relation.ChildFamilyUserID,
+		AccessEnum:           access_relation.AccessEnum,
+		Audit:                access_relation.Audit,
+	}
+
+	return access_relation, caclr, nil
 }
 
 func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
-	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, error) {
+	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dto.CreateACLDTO, error) {
 
 	var default_access = maps.Keys(constants.HEAD_DEFAULT_ACCESS)
 	var access_relation *schemas.AccessRelationshipSchema
+	var dto_response *dto.CreateACLDTO
 	var err error
 
 	switch relation_type {
 	case "HEAD_HEAD":
-		access_relation, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
 	case "PARENT_CHILD":
 		if access != nil {
 			default_access = access
 		} else {
 			default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
 		}
-		access_relation, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
 	case "HEAD_CHILD":
 		default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
-		access_relation, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
 	case "CHILD_CHILD":
 		default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
-		access_relation, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
 	default:
-		return nil, errors.KohamError("KSE-4013")
+		return nil, nil, errors.KohamError("KSE-4013")
 	}
-	return access_relation, err
+	return access_relation, dto_response, err
 }

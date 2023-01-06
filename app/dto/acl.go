@@ -1,8 +1,18 @@
 package dto
 
 import (
+	"github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	"go.mongodb.org/mongo-driver/bson"
 )
+
+type CreateACLDTO struct {
+	AccessRelationshipID string              `json:"access_relationship_id"`
+	HeadUserId           string              `json:"head_family_user_id"`
+	ParentuserId         string              `json:"parent_family_user_id"`
+	ChildUserID          string              `json:"child_family_user_id"`
+	AccessEnum           []float64           `json:"access_enums"`
+	Audit                schemas.AuditSchema `json:"audit"`
+}
 
 type AccessRelation struct {
 	ChildUserID string      `json:"child_user_id"`

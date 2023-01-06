@@ -48,10 +48,12 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 		return errors.DefaultErrorHandler(c, err)
 	}
 
-	if err := acl.Service.CreateAccessRelationship(f_user_id, token, *aclpb); err != nil {
+	res, err := acl.Service.CreateAccessRelationship(f_user_id, token, *aclpb)
+
+	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
-	return c.Status(fiber.StatusOK).SendString("POST family ACL")
+	return c.Status(fiber.StatusOK).JSON(res)
 }
 
 func (acl ACLController) Put(c *fiber.Ctx) error {
