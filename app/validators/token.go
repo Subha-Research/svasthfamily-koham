@@ -6,10 +6,6 @@ import (
 	validator "github.com/go-playground/validator/v10"
 )
 
-// type TokenPostBody struct {
-// 	IsHead bool `json:"is_head" validate:"required"`
-// }
-
 type TokenValidator struct {
 }
 
