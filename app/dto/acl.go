@@ -15,7 +15,7 @@ type CreateACLDTO struct {
 }
 
 type AccessRelation struct {
-	ChildUserID string      `json:"child_user_id"`
+	ChildUserID string      `json:"child_family_user_id"`
 	AccessEnums interface{} `json:"access_enums"`
 }
 

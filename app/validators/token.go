@@ -14,7 +14,7 @@ type TokenValidator struct {
 }
 
 type ValidateTokenRB struct {
-	ChildUserID string  `json:"child_user_id" validate:"required,uuid4_rfc4122"`
+	ChildUserID string  `json:"family_child_user_id" validate:"required,uuid4_rfc4122"`
 	AccessEnum  float64 `json:"access_enum" validate:"required,number"`
 }
 

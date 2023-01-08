@@ -19,20 +19,20 @@ var ExtractTagName = func(fld reflect.StructField) string {
 }
 
 type ChildUserAccess struct {
-	ChildUserId string    `json:"child_user_id" validate:"required,uuid4_rfc4122"`
+	ChildUserId string    `json:"family_child_user_id" validate:"required,uuid4_rfc4122"`
 	AccessEnums []float64 `json:"access_enums" validate:"omitempty,min=1,dive,number"`
 }
 
 type ACLPostBody struct {
 	AccessList   []ChildUserAccess `json:"access_list" validate:"required,min=1,dive"`
-	ParentUserID string            `json:"parent_user_id" validate:"required,uuid4_rfc4122"`
+	ParentUserID string            `json:"family_parent_user_id" validate:"required,uuid4_rfc4122"`
 	IsParentHead *bool             `json:"is_parent_head" validate:"required"`
 }
 
 type ACLPutBody struct {
 	//In Future we may Required "ChildUserAccessList", "ParentUserID","RoleEnum" for implementing the Transfer Access feature.
 	Access       ChildUserAccess `json:"access" validate:"required"`
-	ParentUserID string          `json:"parent_user_id" validate:"required,uuid4_rfc4122"`
+	ParentUserID string          `json:"family_parent_user_id" validate:"required,uuid4_rfc4122"`
 }
 
 type ACLValidator struct {
@@ -89,7 +89,7 @@ func (av *ACLValidator) ValidateACLPutBody(aclputb ACLPutBody, f_user_id string)
 	err := validate.Struct(aclputb)
 
 	error_data := map[string]string{
-		"key": "child_user_id",
+		"key": "family_child_user_id",
 	}
 
 	if err != nil {
