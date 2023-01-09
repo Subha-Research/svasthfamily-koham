@@ -81,10 +81,11 @@ func (acl ACLController) Put(c *fiber.Ctx) error {
 	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
-	if err := acl.Service.UpdateAccessRelationship(f_user_id, *aclputb); err != nil {
+	update_doc_response, err := acl.Service.UpdateAccessRelationship(f_user_id, *aclputb)
+	if err != nil {
 		return errors.DefaultErrorHandler(c, err)
 	}
-	return c.Status(fiber.StatusOK).SendString("PUT family ACL")
+	return c.Status(fiber.StatusOK).JSON(update_doc_response)
 }
 
 func (acl ACLController) Delete(c *fiber.Ctx) error {

@@ -14,6 +14,7 @@ import (
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/exp/maps"
@@ -147,7 +148,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	return &dto_response_array, nil
 }
 
-func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (bson.M, error) {
+func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
 	// Colllection variable is set via Dependency injection from app file
 	time_util := common.TimeUtil{}
 	access_list := rb.Access
@@ -170,7 +171,16 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 		log.Fatal(err)
 	}
 	log.Println("updated document", updatedDocument)
-	return updatedDocument, nil
+
+	uaclr := &dto.UpdateACLDTO{
+		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
+		HeadUserId:           updatedDocument["head_family_user_id"].(string),
+		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
+		ChildUserID:          updatedDocument["child_family_user_id"].(string),
+		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
+		Audit:                updatedDocument["audit"].(primitive.M),
+	}
+	return uaclr, nil
 }
 
 func (arm *AccessRelationshipModel) getSchema(ids UserIDs,

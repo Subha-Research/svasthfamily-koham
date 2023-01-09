@@ -41,31 +41,32 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *strin
 	return inserted_doc_response, nil
 }
 
-func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) error {
+func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
 	// Get Access relation
 	doc, err := acl_s.Model.GetAccessRelationship(&f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
 	if err != nil {
-		return errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("KSE-4015")
 	}
 
 	relation_type := doc["relationship_type"]
 	is_parent_head := doc["is_parent_head"].(bool)
 	switch true {
 	case relation_type == "HEAD_HEAD":
-		return errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("KSE-4015")
 	case relation_type == "PARENT_CHILD" && is_parent_head:
-		return errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("KSE-4015")
 	case relation_type == "CHILD_CHILD":
 		// TODO :: Raise alert
 		log.Println("ALERT:: Invalid case is getting executed")
-		return errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("KSE-4015")
 	case relation_type == "HEAD_CHILD":
-		return errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("KSE-4015")
 	}
 
-	_, err_update_doc := acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
+	update_doc_response, err_update_doc := acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
 	if err_update_doc != nil {
-		return err_update_doc
+		return nil, err_update_doc
 	}
-	return nil
+	return update_doc_response, nil
+
 }
