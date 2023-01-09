@@ -40,12 +40,12 @@ func TestPingRoute(t *testing.T) {
 		App: f_app,
 		Routes: &routes.Routes{
 			BaseValidator: &base_validators.BaseValidator{
-				TokenService: &services.TokenService{},
+				ITokenService: &services.TokenService{},
 			},
 			BaseController: &controllers.BaseController{
 				ACLController: &controllers.ACLController{
-					Validator: validators.ACLValidator{},
-					Service: services.ACLService{
+					Validator: &validators.ACLValidator{},
+					Service: &services.ACLService{
 						Model: &models.AccessRelationshipModel{},
 					},
 				},

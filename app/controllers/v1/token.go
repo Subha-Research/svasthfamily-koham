@@ -19,10 +19,10 @@ func (tc TokenController) Get(c *fiber.Ctx) error {
 func (tc TokenController) Post(c *fiber.Ctx) error {
 	token := c.Locals("token").(*string)
 	f_user_id := c.Params("user_id")
-	opt_param := c.Params("validate")
+	opt_param := c.Params("opt")
 
 	if opt_param == "validate" {
-		tokenrb := new(validators.TokenRequestBody)
+		tokenrb := new(validators.ValidateTokenRB)
 		err := c.BodyParser(tokenrb)
 		if err != nil {
 			// If any error in body parsing of fiber

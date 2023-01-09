@@ -1,24 +1,20 @@
 package validators
 
 import (
-	"github.com/Subha-Research/svasthfamily-koham/app/enums"
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	validator "github.com/go-playground/validator/v10"
 )
 
-// type TokenPostBody struct {
-// 	IsHead bool `json:"is_head" validate:"required"`
-// }
-
 type TokenValidator struct {
 }
 
-type TokenRequestBody struct {
-	ChildmemberID string  `json:"child_member_id" validate:"required,uuid4_rfc4122"`
-	AccessEnum    float64 `json:"access_enum" validate:"required,number"`
+type ValidateTokenRB struct {
+	ChildUserID string  `json:"family_child_user_id" validate:"required,uuid4_rfc4122"`
+	AccessEnum  float64 `json:"access_enum" validate:"required,number"`
 }
 
-func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
+func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 	err := validate.Struct(rb)
 	error_data := map[string]string{
 		"key": "role",
@@ -32,7 +28,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb TokenRequestBody) error {
 	}
 
 	// Validate access enums
-	d := enums.Accesses
+	d := constants.HEAD_DEFAULT_ACCESS
 	for k := range d {
 		if k == rb.AccessEnum {
 			return nil

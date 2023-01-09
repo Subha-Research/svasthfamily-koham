@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	enums "github.com/Subha-Research/svasthfamily-koham/app/enums"
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 
 	"github.com/google/uuid"
@@ -40,7 +40,7 @@ func (am *AccessModel) GetAccess(access_enum float64, access_key string) (bson.M
 func (am *AccessModel) InsertAllAccesses() error {
 	// Collection variable is set via Dependency injection from app file
 	var access_docs []interface{}
-	access_map := enums.Accesses
+	access_map := constants.HEAD_DEFAULT_ACCESS
 	for k, v := range access_map {
 		// Check first if the same role already exists
 		// If exist then do not insert that

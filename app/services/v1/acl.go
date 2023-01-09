@@ -3,62 +3,70 @@ package services
 import (
 	"log"
 
-	"github.com/Subha-Research/svasthfamily-koham/app/constants"
-	"github.com/Subha-Research/svasthfamily-koham/app/enums"
+	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
 )
-
-type IACLService interface {
-	CreateSFRelationship(string, validators.ACLPostBody) error
-}
 
 type ACLService struct {
 	Model *models.AccessRelationshipModel
 }
 
-func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, rb validators.ACLPostBody) error {
-	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
-	if err != nil {
-		log.Fatal("Errro in  getting collection and session. Stopping server", err)
-	}
-	// Dependency injection pattern
-	acl_s.Model.Collection = ar_coll
-	if enums.Roles[rb.RoleEnum] != "FAMILY_HEAD" {
-		_, err_get_doc_head := acl_s.Model.GetAccessRelationship(f_user_id, f_user_id)
+func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *string, rb validators.ACLPostBody) (*[]dto.CreateACLDTO, error) {
+	var is_head_head_relation = true
+	if token != nil {
+		_, err_get_doc_head := acl_s.Model.GetAccessRelationship(nil, f_user_id, f_user_id)
 		if err_get_doc_head != nil {
-			return err_get_doc_head
+			return nil, err_get_doc_head
 		}
-		_, err_get_doc_parent := acl_s.Model.GetAccessRelationship(rb.ParentMemberID, rb.ParentMemberID)
+		_, err_get_doc_parent := acl_s.Model.GetAccessRelationship(nil, rb.ParentUserID, rb.ParentUserID)
 		if err_get_doc_parent != nil {
-			return err_get_doc_parent
+			return nil, err_get_doc_parent
 		}
-		_, err_get_doc_head_parent := acl_s.Model.GetAccessRelationship(f_user_id, rb.ParentMemberID)
+		_, err_get_doc_head_parent := acl_s.Model.GetAccessRelationship(nil, f_user_id, rb.ParentUserID)
 		if err_get_doc_head_parent != nil {
-			return err_get_doc_head_parent
+			return nil, err_get_doc_head_parent
 		}
+		is_head_head_relation = false
 	}
-	inserted_doc, err := acl_s.Model.InsertAllAccessRelationship(f_user_id, rb)
+	// Indicates getting called from another
+	// microservice with x-service-id
+	// Hence, request for creating HEAD_HEAD access relationship
+	inserted_doc_response, err := acl_s.Model.InsertAllAccessRelationship(f_user_id, is_head_head_relation, rb)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	log.Println("Inserted document", inserted_doc)
-	return nil
+	// log.Println("Inserted document", inserted_doc)
+	return inserted_doc_response, nil
 }
 
-func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) error {
-	database := models.Database{}
-	ar_coll, _, err := database.GetCollectionAndSession(constants.ACLCollection)
+func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+	// Get Access relation
+	doc, err := acl_s.Model.GetAccessRelationship(&f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
 	if err != nil {
-		log.Fatal("Errro in  getting collection and session. Stopping server", err)
-	}
-	// Dependency injection pattern
-	acl_s.Model.Collection = ar_coll
-	_, err_update_doc := acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
-	if err_update_doc != nil {
-		return err_update_doc
+		return nil, errors.KohamError("KSE-4015")
 	}
 
-	return nil
+	relation_type := doc["relationship_type"]
+	is_parent_head := doc["is_parent_head"].(bool)
+	switch true {
+	case relation_type == "HEAD_HEAD":
+		return nil, errors.KohamError("KSE-4015")
+	case relation_type == "PARENT_CHILD" && is_parent_head:
+		return nil, errors.KohamError("KSE-4015")
+	case relation_type == "CHILD_CHILD":
+		// TODO :: Raise alert
+		log.Println("ALERT:: Invalid case is getting executed")
+		return nil, errors.KohamError("KSE-4015")
+	case relation_type == "HEAD_CHILD":
+		return nil, errors.KohamError("KSE-4015")
+	}
+
+	update_doc_response, err_update_doc := acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
+	if err_update_doc != nil {
+		return nil, err_update_doc
+	}
+	return update_doc_response, nil
+
 }

@@ -17,18 +17,13 @@ type TokenServiceTest struct {
 }
 
 func (tst *TokenServiceTest) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
-	all_access_relations, _ := tst.ARModel.GetAllAccessRelationship(f_user_id)
 	signing_key := []byte(constants.TokenSigingKey)
 	loc, err := time.LoadLocation("Asia/Kolkata")
 	token_expiry := jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc).Add(constants.TokenExpiryTTL * time.Hour))
-	dto := dto.AccessRelationshipDTO{}
-	acl_dto, err := dto.FormatAllAccessRelationship(all_access_relations)
 	if err != nil {
 		return nil, err
 	}
 	claims := services.TokenClaims{
-		FUserID:    f_user_id,
-		AccessList: acl_dto,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: token_expiry,
@@ -50,11 +45,11 @@ func (tst *TokenServiceTest) GetToken(f_user_id string) (*string, error) {
 	return nil, nil
 }
 
-func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) ([]dto.AccessRelation, error) {
-	return nil, nil
+func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) error {
+	return nil
 }
 
-func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.TokenRequestBody) (*dto.ValidateTokenResponse, error) {
+func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
 	return nil, nil
 }
 

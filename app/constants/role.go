@@ -1,6 +1,6 @@
-package enums
+package constants
 
-var Roles = map[int]string{
+var ROLES = map[int]string{
 	101: "FAMILY_HEAD",
 	102: "FAMILY_MEMBER",
 }

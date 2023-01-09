@@ -44,11 +44,12 @@ func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Ti
 	}
 	log.Println("Inserted token document with ID", res.InsertedID)
 	// Build response data
-	ctr := dto.CreateTokenResponse{}
-	ctr.TokenKey = token
-	ctr.TokenExpiry = expiry
-	ctr.FamilyUserID = f_user_id
-	ctr.Audit = *as
+	ctr := dto.CreateTokenResponse{
+		TokenKey:     token,
+		TokenExpiry:  expiry,
+		FamilyUserID: f_user_id,
+		Audit:        *as,
+	}
 	return &ctr, nil
 }
 
