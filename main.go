@@ -16,6 +16,8 @@ import (
 
 func main() {
 	db := &models.Database{}
+
+	// Singleton pattern
 	token_coll, _, err := db.GetCollectionAndSession(constants.TOKEN_COLLECTION)
 	if err != nil {
 		log.Fatal("Error in getting collection and session. Stopping server", err)

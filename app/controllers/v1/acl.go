@@ -19,9 +19,6 @@ func (acl ACLController) Get(c *fiber.Ctx) error {
 }
 
 func (acl ACLController) Post(c *fiber.Ctx) error {
-	// TODO:: Validate token access before inserting
-	// into database
-	// Implement DTO for response
 	token := c.Locals("token").(*string)
 	f_user_id := c.Params("user_id")
 	if token != nil {
