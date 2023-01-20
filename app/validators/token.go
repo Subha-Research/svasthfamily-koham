@@ -28,7 +28,8 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 	}
 
 	// Validate access enums
-	d := constants.HEAD_DEFAULT_ACCESS
+	acl_const := constants.ACLConstants{}
+	d := acl_const.GetConstantAccessList("HEAD")
 	for k := range d {
 		if k == rb.AccessEnum {
 			return nil

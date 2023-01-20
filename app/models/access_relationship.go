@@ -217,27 +217,29 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
 func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
 	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dto.CreateACLDTO, error) {
 
-	var default_access = maps.Keys(constants.HEAD_DEFAULT_ACCESS)
+	var acl_const = constants.ACLConstants{}
+	var child_default_access = maps.Keys(acl_const.GetConstantAccessList("CHILD"))
+	var head_default_access = maps.Keys(acl_const.GetConstantAccessList("HEAD"))
+
+	var default_access []float64
 	var access_relation *schemas.AccessRelationshipSchema
 	var dto_response *dto.CreateACLDTO
 	var err error
 
 	switch relation_type {
 	case "HEAD_HEAD":
-		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, head_default_access)
 	case "PARENT_CHILD":
 		if access != nil {
 			default_access = access
 		} else {
-			default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
+			default_access = child_default_access
 		}
 		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
 	case "HEAD_CHILD":
-		default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
-		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, child_default_access)
 	case "CHILD_CHILD":
-		default_access = maps.Keys(constants.CHILD_DEFAULT_ACCESS)
-		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, default_access)
+		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, child_default_access)
 	default:
 		return nil, nil, errors.KohamError("KSE-4013")
 	}

@@ -1,5 +1,7 @@
 package constants
 
+import "golang.org/x/exp/maps"
+
 var CHILD_DEFAULT_ACCESS = map[float64]string{
 	102: "UPDATE_SFM_DETAILS",
 	104: "VIEW_SFM_DETAILS",
@@ -8,18 +10,28 @@ var CHILD_DEFAULT_ACCESS = map[float64]string{
 	109: "ADD_SFM_HEALTH_RECORD_METADATA",
 	110: "VIEW_SFM_HEALTH_RECORD_METADATA",
 	111: "SUGGEST_SFM_HEALTH_RECORD_METADATA",
+	112: "VIEW_ALL_SFM_BASIC_DETAILS", // View all members basic details
 }
 
-var HEAD_DEFAULT_ACCESS = map[float64]string{
-	101: "ADD_SFM",
-	102: "UPDATE_SFM_DETAILS",
-	103: "UPDATE_SFM_ACCESS",
-	104: "VIEW_SFM_DETAILS",
-	105: "VIEW_SFM_ACCESS",
-	106: "DELETE_SFM",
-	107: "ADD_SFM_HEALTH_RECORD",
-	108: "VIEW_SFM_HEALTH_RECORD",
-	109: "ADD_SFM_HEALTH_RECORD_METADATA",
-	110: "VIEW_SFM_HEALTH_RECORD_METADATA",
-	111: "SUGGEST_SFM_HEALTH_RECORD_METADATA",
+type ACLConstants struct {
+}
+
+func (acl_c *ACLConstants) GetConstantAccessList(acl_type string) map[float64]string {
+	var access_list map[float64]string
+	switch acl_type {
+	case "CHILD":
+		access_list = CHILD_DEFAULT_ACCESS
+	case "HEAD":
+		head_access := map[float64]string{
+			101: "ADD_SFM",
+			103: "UPDATE_SFM_ACCESS",
+			105: "VIEW_SFM_ACCESS",
+			106: "DELETE_SFM",
+		}
+		maps.Copy(head_access, CHILD_DEFAULT_ACCESS)
+		access_list = head_access
+	default:
+		access_list = nil
+	}
+	return access_list
 }
