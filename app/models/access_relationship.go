@@ -153,9 +153,16 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	time_util := common.TimeUtil{}
 	access_list := rb.Access
 	access_relation := access_list.AccessEnums
+	f_member_id := rb.FamilyMemberID
+	f_id := rb.FamilyID
 
-	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildUserId}, {Key: "parent_family_user_id", Value: rb.ParentUserID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation}, {Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()}, {Key: "audit.updated_by", Value: f_head_user_id}}}}
+	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildUserId},
+		{Key: "parent_family_user_id", Value: rb.ParentUserID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation},
+		{Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()},
+		{Key: "audit.updated_by", Value: f_head_user_id},
+		{Key: "family_id", Value: f_id},
+		{Key: "family_member_id", Value: f_member_id}}}}
 	var updatedDocument bson.M
 	err := arm.Collection.FindOneAndUpdate(
 		context.TODO(),
@@ -179,6 +186,8 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 		ChildUserID:          updatedDocument["child_family_user_id"].(string),
 		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
 		Audit:                updatedDocument["audit"].(primitive.M),
+		FamilyID:             updatedDocument["family_id"].(string),
+		FamilyMemberID:       updatedDocument["family_member_id"].(string),
 	}
 	return uaclr, nil
 }
