@@ -25,6 +25,7 @@ type UpdateACLDTO struct {
 	FamilyID             string      `json:"family_id"`
 	FamilyMemberID       string      `json:"family_member_id"`
 }
+
 type AccessRelation struct {
 	ChildUserID string      `json:"child_family_user_id"`
 	AccessEnums interface{} `json:"access_enums"`

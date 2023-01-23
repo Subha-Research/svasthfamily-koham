@@ -26,9 +26,11 @@ type AccessRelationshipModel struct {
 }
 
 type UserIDs struct {
-	HeadUserId   string
-	ChildUserId  string
-	ParentUserId string
+	HeadUserId     string
+	ChildUserId    string
+	ParentUserId   string
+	FamilyID       string
+	FamilyMemberID string
 }
 
 func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) ([]bson.M, error) {
@@ -55,11 +57,16 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 	return results, nil
 }
 
-func (arm *AccessRelationshipModel) GetAccessRelationship(f_head_user_id *string, f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_head_user_id *string, f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+	// TODO:: See if this method can consider family_id too in the filter.
 	var filter = bson.D{{Key: "parent_family_user_id", Value: f_parent_user_id}, {Key: "child_family_user_id", Value: f_child_user_id}}
 	if f_head_user_id != nil {
 		filter = append(filter, bson.E{Key: "head_family_user_id", Value: f_head_user_id})
 	}
+	if family_id != nil {
+		filter = append(filter, bson.E{Key: "family_id", Value: family_id})
+	}
+
 	var result bson.M
 	err := arm.Collection.FindOne(
 		context.TODO(),
@@ -88,17 +95,25 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		var err error
 		var access_relation_parent_child *schemas.AccessRelationshipSchema
 		var dto_response *dto.CreateACLDTO
+		var doc bson.M
 
-		// If access already created in parent user id and child user id
-		doc, _ := arm.GetAccessRelationship(nil, rb.ParentUserID, access_list[i].ChildUserId)
+		// If access already created in parent user id and child user id and family id
+		if rb.FamilyID != "" {
+			doc, _ = arm.GetAccessRelationship(&rb.FamilyID, nil, rb.ParentUserID, access_list[i].ChildUserId)
+		} else {
+			doc, _ = arm.GetAccessRelationship(nil, nil, rb.ParentUserID, access_list[i].ChildUserId)
+		}
+
 		if doc != nil {
 			return nil, errors.KohamError("KSE-4009")
 		}
 
 		u_ids := UserIDs{
-			HeadUserId:   f_head_user_id,
-			ChildUserId:  access_list[i].ChildUserId,
-			ParentUserId: rb.ParentUserID,
+			HeadUserId:     f_head_user_id,
+			ChildUserId:    access_list[i].ChildUserId,
+			ParentUserId:   rb.ParentUserID,
+			FamilyID:       rb.FamilyID,
+			FamilyMemberID: rb.FamilyMemberID,
 		}
 		if is_head_head && access_enums == nil {
 			access_relation_parent_child, dto_response, err = arm.getAccessRelation(u_ids, "HEAD_HEAD", *rb.IsParentHead, access_enums)
@@ -129,7 +144,6 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 				}
 				access_list_docs = append(access_list_docs, access_relation_head_child)
 				dto_response_array = append(dto_response_array, *dto_h_c)
-
 			}
 		}
 	}
@@ -149,20 +163,15 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 }
 
 func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
-	// Colllection variable is set via Dependency injection from app file
 	time_util := common.TimeUtil{}
 	access_list := rb.Access
 	access_relation := access_list.AccessEnums
-	f_member_id := rb.FamilyMemberID
-	f_id := rb.FamilyID
 
 	filter := bson.D{{Key: "child_family_user_id", Value: rb.Access.ChildUserId},
 		{Key: "parent_family_user_id", Value: rb.ParentUserID}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "access_enums", Value: access_relation},
 		{Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()},
-		{Key: "audit.updated_by", Value: f_head_user_id},
-		{Key: "family_id", Value: f_id},
-		{Key: "family_member_id", Value: f_member_id}}}}
+		{Key: "audit.updated_by", Value: f_head_user_id}}}}
 	var updatedDocument bson.M
 	err := arm.Collection.FindOneAndUpdate(
 		context.TODO(),
@@ -173,9 +182,95 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 		// ErrNoDocuments means that the filter did not match any documents in
 		// the collection.
 		if err == mongo.ErrNoDocuments {
-			return nil, err
+			err_data := map[string]string{
+				"id": rb.Access.ChildUserId,
+			}
+			return nil, errors.KohamError("KSE-4012", err_data)
 		}
-		log.Fatal(err)
+		log.Println("Error in updating family ID", err)
+		return nil, errors.KohamError("KSE-5001")
+	}
+	log.Println("updated document", updatedDocument)
+
+	uaclr := &dto.UpdateACLDTO{
+		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
+		HeadUserId:           updatedDocument["head_family_user_id"].(string),
+		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
+		ChildUserID:          updatedDocument["child_family_user_id"].(string),
+		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
+		Audit:                updatedDocument["audit"].(primitive.M),
+	}
+	return uaclr, nil
+}
+
+func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+	time_util := common.TimeUtil{}
+	family_id := rb.FamilyID
+
+	filter := bson.D{{Key: "child_family_user_id", Value: f_head_user_id},
+		{Key: "parent_family_user_id", Value: f_head_user_id}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "family_id", Value: family_id},
+		{Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()},
+		{Key: "audit.updated_by", Value: f_head_user_id}}}}
+	var updatedDocument bson.M
+	err := arm.Collection.FindOneAndUpdate(
+		context.TODO(),
+		filter,
+		update,
+	).Decode(&updatedDocument)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in
+		// the collection.
+		if err == mongo.ErrNoDocuments {
+			err_data := map[string]string{
+				"id": f_head_user_id,
+			}
+			return nil, errors.KohamError("KSE-4012", err_data)
+		}
+		log.Println("Error in updating family ID", err)
+		return nil, errors.KohamError("KSE-5001")
+	}
+	log.Println("updated document", updatedDocument)
+
+	uaclr := &dto.UpdateACLDTO{
+		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
+		HeadUserId:           updatedDocument["head_family_user_id"].(string),
+		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
+		ChildUserID:          updatedDocument["child_family_user_id"].(string),
+		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
+		Audit:                updatedDocument["audit"].(primitive.M),
+		FamilyID:             updatedDocument["family_id"].(string),
+		FamilyMemberID:       updatedDocument["family_member_id"].(string),
+	}
+	return uaclr, nil
+}
+
+func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+	time_util := common.TimeUtil{}
+	family_member_id := rb.FamilyMemberID
+
+	filter := bson.D{{Key: "child_family_user_id", Value: f_head_user_id},
+		{Key: "parent_family_user_id", Value: f_head_user_id}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "family_member_id", Value: family_member_id},
+		{Key: "audit.updated_at", Value: *time_util.CurrentTimeInUTC()},
+		{Key: "audit.updated_by", Value: f_head_user_id}}}}
+	var updatedDocument bson.M
+	err := arm.Collection.FindOneAndUpdate(
+		context.TODO(),
+		filter,
+		update,
+	).Decode(&updatedDocument)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in
+		// the collection.
+		if err == mongo.ErrNoDocuments {
+			err_data := map[string]string{
+				"id": f_head_user_id,
+			}
+			return nil, errors.KohamError("KSE-4012", err_data)
+		}
+		log.Println("Error in updating family ID", err)
+		return nil, errors.KohamError("KSE-5001")
 	}
 	log.Println("updated document", updatedDocument)
 
@@ -200,6 +295,8 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
 		HeadFamilyUserID:     ids.HeadUserId,
 		ChildFamilyUserID:    ids.ChildUserId,
 		ParentFamilyUserID:   ids.ParentUserId,
+		FamilyID:             ids.FamilyID,
+		FamilyMemberID:       ids.FamilyMemberID,
 		RelationshipType:     relation_type,
 		IsParentHead:         is_parent_head,
 		AccessEnum:           access,

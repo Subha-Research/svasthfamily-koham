@@ -24,10 +24,13 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	req_method := c.Method()
 	resource_type := c.Params("resource_type")
 	user_id := c.Params("user_id")
-	strategy, err := bv.headerValidationStrategy(resource_type, opt_param, req_method)
+	strategy, is_head_acl_req, err := bv.headerValidationStrategy(resource_type, opt_param, req_method)
 	if err != nil {
 		return nil, err
 	}
+
+	// Set local variable
+	c.Locals("is_head_acl_request", is_head_acl_req)
 
 	if *strategy == constants.HEADER_VALIDATOR_STRATEGY["service"] {
 		x_service_id, err := uuid.Parse(c.Get("x-service-id"))
@@ -58,12 +61,14 @@ func (bv *BaseValidator) ValidateHeaders(c *fiber.Ctx) (*string, error) {
 	return nil, nil
 }
 
-func (bv *BaseValidator) headerValidationStrategy(resource_type string, opt string, req_method string) (*string, error) {
+func (bv *BaseValidator) headerValidationStrategy(resource_type string, opt string, req_method string) (*string, bool, error) {
 	var strategy string
+	var is_head_acl_request = false
 	switch true {
 	case resource_type == "tokens" && opt == "" && (req_method == "POST" || req_method == "GET"):
 		strategy = constants.HEADER_VALIDATOR_STRATEGY["service"]
 	case resource_type == "acls" && opt == "head":
+		is_head_acl_request = true
 		strategy = constants.HEADER_VALIDATOR_STRATEGY["service"]
 	case resource_type == "tokens" && opt == "validate":
 		strategy = constants.HEADER_VALIDATOR_STRATEGY["authorization"]
@@ -72,7 +77,7 @@ func (bv *BaseValidator) headerValidationStrategy(resource_type string, opt stri
 	case resource_type == "acls" && opt == "":
 		strategy = constants.HEADER_VALIDATOR_STRATEGY["authorization"]
 	default:
-		return nil, errors.KohamError("KSE-4014")
+		return nil, is_head_acl_request, errors.KohamError("KSE-4014")
 	}
-	return &strategy, nil
+	return &strategy, is_head_acl_request, nil
 }

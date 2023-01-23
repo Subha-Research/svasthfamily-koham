@@ -150,7 +150,7 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 	var delete_token_key *string
 	if token == nil {
 		delete_token_key = &result.TokenKey
-	} else if token != nil && *&result.TokenKey == *token {
+	} else if token != nil && result.TokenKey == *token {
 		delete_token_key = token
 	} else {
 		log.Printf("Given token %s did not match with database", *token)

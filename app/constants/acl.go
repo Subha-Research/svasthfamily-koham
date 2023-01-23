@@ -2,6 +2,26 @@ package constants
 
 import "golang.org/x/exp/maps"
 
+type UPDATE_INFO struct {
+	Type       string
+	AccessEnum float64
+}
+
+var UPDATE_TYPE = map[string]*UPDATE_INFO{
+	"UPDATE_FAMILY_ID": {
+		Type:       "UPDATE_FAMILY_ID",
+		AccessEnum: 113,
+	},
+	"UPDATE_FAMILY_MEMBER_ID": {
+		Type:       "UPDATE_FAMILY_MEMBER_ID",
+		AccessEnum: 114,
+	},
+	"UPDATE_SFM_ACCESS": {
+		Type:       "UPDATE_SFM_ACCESS",
+		AccessEnum: 114,
+	},
+}
+
 var CHILD_DEFAULT_ACCESS = map[float64]string{
 	102: "UPDATE_SFM_DETAILS",
 	104: "VIEW_SFM_DETAILS",
@@ -27,6 +47,8 @@ func (acl_c *ACLConstants) GetConstantAccessList(acl_type string) map[float64]st
 			103: "UPDATE_SFM_ACCESS",
 			105: "VIEW_SFM_ACCESS",
 			106: "DELETE_SFM",
+			113: "UPDATE_FAMILY_ID",
+			114: "UPDATE_FAMILY_MEMBER_ID",
 		}
 		maps.Copy(head_access, CHILD_DEFAULT_ACCESS)
 		access_list = head_access

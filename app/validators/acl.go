@@ -24,9 +24,11 @@ type ChildUserAccess struct {
 }
 
 type ACLPostBody struct {
-	AccessList   []ChildUserAccess `json:"access_list" validate:"required,min=1,dive"`
-	ParentUserID string            `json:"family_parent_user_id" validate:"required,uuid4_rfc4122"`
-	IsParentHead *bool             `json:"is_parent_head" validate:"required"`
+	AccessList     []ChildUserAccess `json:"access_list" validate:"required,min=1,dive"`
+	ParentUserID   string            `json:"family_parent_user_id" validate:"required,uuid4_rfc4122"`
+	FamilyID       string            `json:"family_id" validate:"omitempty,uuid_rfc4122"`
+	FamilyMemberID string            `json:"family_member_id" validate:"omitempty,uuid_rfc4122"`
+	IsParentHead   *bool             `json:"is_parent_head" validate:"required"`
 }
 
 type ACLPutBody struct {
@@ -57,7 +59,7 @@ func (av *ACLValidator) validateAccess(a_enums []float64) bool {
 	return true
 }
 
-func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string) error {
+func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string, is_head_acl_request bool) error {
 	validate.RegisterTagNameFunc(ExtractTagName)
 	err := validate.Struct(aclpb)
 	error_data := map[string]string{
@@ -67,6 +69,16 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			error_data["key"] = err.Field()
+			return errors.KohamError("KSE-4006", error_data)
+		}
+	}
+
+	if !is_head_acl_request {
+		if aclpb.FamilyID == "" {
+			error_data["key"] = "family_id"
+			return errors.KohamError("KSE-4006", error_data)
+		} else if aclpb.FamilyMemberID == "" {
+			error_data["key"] = "family_member_id"
 			return errors.KohamError("KSE-4006", error_data)
 		}
 	}
