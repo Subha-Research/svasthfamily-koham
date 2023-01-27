@@ -12,7 +12,7 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type TokenService struct {
@@ -115,24 +115,32 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		log.Printf("Given token %s did not match with database", *token)
 		return nil, errors.KohamError("KSE-4009")
 	}
-	all_access_relations, err := ts.ARModel.GetAllAccessRelationship(f_user_id)
-	acl_dto := dto.AccessRelationshipDTO{}
+	var acl_doc bson.M
+
+	switch rb.AccessEnum {
+	case 115:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 101:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 104:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, &rb.FamilyMemberId, nil, f_user_id, rb.ChildUserID)
+	case 112:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
+	case 116:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
+	default:
+		return nil, errors.KohamError("")
+	}
+	// If error
 	if err != nil {
 		return nil, err
 	}
-	access_list, _ := acl_dto.FormatAllAccessRelationship(all_access_relations)
+	log.Println("Access realtionship document", acl_doc)
 
-	for _, v := range access_list {
-		if v.ChildUserID == rb.ChildUserID {
-			for _, e := range v.AccessEnums.(primitive.A) {
-				if e.(float64) == rb.AccessEnum {
-					// Build Response
-					vtr := dto.ValidateTokenResponse{}
-					vtr.Access = true
-					return &vtr, nil
-				}
-			}
-		}
+	if acl_doc != nil {
+		vtr := dto.ValidateTokenResponse{}
+		vtr.Access = true
+		return &vtr, nil
 	}
 	return nil, errors.KohamError("KSE-4009")
 }

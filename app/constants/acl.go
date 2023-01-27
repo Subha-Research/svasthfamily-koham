@@ -31,6 +31,7 @@ var CHILD_DEFAULT_ACCESS = map[float64]string{
 	110: "VIEW_SFM_HEALTH_RECORD_METADATA",
 	111: "SUGGEST_SFM_HEALTH_RECORD_METADATA",
 	112: "VIEW_ALL_SFM_BASIC_DETAILS", // View all members basic details
+	116: "GET_FAMILY_DETAILS",
 }
 
 type ACLConstants struct {
@@ -49,6 +50,7 @@ func (acl_c *ACLConstants) GetConstantAccessList(acl_type string) map[float64]st
 			106: "DELETE_SFM",
 			113: "UPDATE_FAMILY_ID",
 			114: "UPDATE_FAMILY_MEMBER_ID",
+			115: "CREATE_FAMILY",
 		}
 		maps.Copy(head_access, CHILD_DEFAULT_ACCESS)
 		access_list = head_access

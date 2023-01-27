@@ -19,15 +19,15 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *strin
 
 	if token != nil {
 		// Check if document already exists
-		_, err_get_doc_head := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, f_user_id, f_user_id)
+		_, err_get_doc_head := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, nil, f_user_id, f_user_id)
 		if err_get_doc_head != nil {
 			return nil, err_get_doc_head
 		}
-		_, err_get_doc_parent := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, rb.ParentUserID, rb.ParentUserID)
+		_, err_get_doc_parent := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, nil, rb.ParentUserID, rb.ParentUserID)
 		if err_get_doc_parent != nil {
 			return nil, err_get_doc_parent
 		}
-		_, err_get_doc_head_parent := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, f_user_id, rb.ParentUserID)
+		_, err_get_doc_head_parent := acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, nil, f_user_id, rb.ParentUserID)
 		if err_get_doc_head_parent != nil {
 			return nil, err_get_doc_head_parent
 		}
@@ -50,9 +50,9 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 
 	// Get Access relation
 	if update_type == "UPDATE_FAMILY_ID" {
-		doc, err = acl_s.Model.GetAccessRelationship(&rb.FamilyID, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
+		doc, err = acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
 	} else {
-		doc, err = acl_s.Model.GetAccessRelationship(nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
+		doc, err = acl_s.Model.GetAccessRelationship(nil, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
 	}
 	if err != nil {
 		return nil, errors.KohamError("KSE-4015")

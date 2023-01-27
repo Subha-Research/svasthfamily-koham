@@ -57,11 +57,15 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 	return results, nil
 }
 
-func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_head_user_id *string, f_parent_user_id string, f_child_user_id string) (bson.M, error) {
+func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_member_id *string,
+	f_head_user_id *string, f_parent_user_id string, f_child_user_id string) (bson.M, error) {
 	// TODO:: See if this method can consider family_id too in the filter.
 	var filter = bson.D{{Key: "parent_family_user_id", Value: f_parent_user_id}, {Key: "child_family_user_id", Value: f_child_user_id}}
 	if f_head_user_id != nil {
 		filter = append(filter, bson.E{Key: "head_family_user_id", Value: f_head_user_id})
+	}
+	if f_member_id != nil {
+		filter = append(filter, bson.E{Key: "family_member_id", Value: f_member_id})
 	}
 	if family_id != nil {
 		filter = append(filter, bson.E{Key: "family_id", Value: family_id})
@@ -78,7 +82,7 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_h
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.KohamError("KSE-4007")
 		}
-		return nil, err
+		return nil, errors.KohamError("KSE-5001")
 	}
 	fmt.Printf("User ID matched %v", result)
 	return result, nil
@@ -99,9 +103,9 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 
 		// If access already created in parent user id and child user id and family id
 		if rb.FamilyID != "" {
-			doc, _ = arm.GetAccessRelationship(&rb.FamilyID, nil, rb.ParentUserID, access_list[i].ChildUserId)
+			doc, _ = arm.GetAccessRelationship(&rb.FamilyID, nil, nil, rb.ParentUserID, access_list[i].ChildUserId)
 		} else {
-			doc, _ = arm.GetAccessRelationship(nil, nil, rb.ParentUserID, access_list[i].ChildUserId)
+			doc, _ = arm.GetAccessRelationship(nil, nil, nil, rb.ParentUserID, access_list[i].ChildUserId)
 		}
 
 		if doc != nil {
