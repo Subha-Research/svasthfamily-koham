@@ -8,7 +8,7 @@ import (
 
 	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	schemas "github.com/Subha-Research/svasthfamily-koham/app/schemas"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -88,17 +88,17 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_m
 	return result, nil
 }
 
-func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, is_head_head bool, rb validators.ACLPostBody) (*[]dto.CreateACLDTO, error) {
+func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id string, is_head_head bool, rb validators.ACLPostBody) (*[]dtos.CreateACLDTO, error) {
 	// time_util := common.TimeUtil{}
 	var access_list_docs []interface{}
-	var dto_response_array []dto.CreateACLDTO
+	var dto_response_array []dtos.CreateACLDTO
 
 	access_list := rb.AccessList
 	for i := 0; i < len(access_list); i++ {
 		var access_enums = access_list[i].AccessEnums
 		var err error
 		var access_relation_parent_child *schemas.AccessRelationshipSchema
-		var dto_response *dto.CreateACLDTO
+		var dto_response *dtos.CreateACLDTO
 		var doc bson.M
 
 		// If access already created in parent user id and child user id and family id
@@ -166,7 +166,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 	return &dto_response_array, nil
 }
 
-func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
 	time_util := common.TimeUtil{}
 	access_list := rb.Access
 	access_relation := access_list.AccessEnums
@@ -196,7 +196,7 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	}
 	log.Println("updated document", updatedDocument)
 
-	uaclr := &dto.UpdateACLDTO{
+	uaclr := &dtos.UpdateACLDTO{
 		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
 		HeadUserId:           updatedDocument["head_family_user_id"].(string),
 		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
@@ -207,7 +207,7 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 	return uaclr, nil
 }
 
-func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
 	time_util := common.TimeUtil{}
 	family_id := rb.FamilyID
 
@@ -236,7 +236,7 @@ func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb val
 	}
 	log.Println("updated document", updatedDocument)
 
-	uaclr := &dto.UpdateACLDTO{
+	uaclr := &dtos.UpdateACLDTO{
 		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
 		HeadUserId:           updatedDocument["head_family_user_id"].(string),
 		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
@@ -249,7 +249,7 @@ func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb val
 	return uaclr, nil
 }
 
-func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
 	time_util := common.TimeUtil{}
 	family_member_id := rb.FamilyMemberID
 
@@ -278,7 +278,7 @@ func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, 
 	}
 	log.Println("updated document", updatedDocument)
 
-	uaclr := &dto.UpdateACLDTO{
+	uaclr := &dtos.UpdateACLDTO{
 		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
 		HeadUserId:           updatedDocument["head_family_user_id"].(string),
 		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
@@ -292,7 +292,7 @@ func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, 
 }
 
 func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
-	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dto.CreateACLDTO, error) {
+	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dtos.CreateACLDTO, error) {
 
 	access_relation := &schemas.AccessRelationshipSchema{
 		AccessRelationshipID: uuid.NewString(),
@@ -312,7 +312,7 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
 			UpdatedBy: ids.HeadUserId,
 		},
 	}
-	caclr := &dto.CreateACLDTO{
+	caclr := &dtos.CreateACLDTO{
 		AccessRelationshipID: access_relation.AccessRelationshipID,
 		HeadUserId:           access_relation.HeadFamilyUserID,
 		ParentuserId:         access_relation.ParentFamilyUserID,
@@ -325,7 +325,7 @@ func (arm *AccessRelationshipModel) getSchema(ids UserIDs,
 }
 
 func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
-	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dto.CreateACLDTO, error) {
+	relation_type string, is_parent_head bool, access []float64) (*schemas.AccessRelationshipSchema, *dtos.CreateACLDTO, error) {
 
 	var acl_const = constants.ACLConstants{}
 	var child_default_access = maps.Keys(acl_const.GetConstantAccessList("CHILD"))
@@ -333,7 +333,7 @@ func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
 
 	var default_access []float64
 	var access_relation *schemas.AccessRelationshipSchema
-	var dto_response *dto.CreateACLDTO
+	var dto_response *dtos.CreateACLDTO
 	var err error
 
 	switch relation_type {

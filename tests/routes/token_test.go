@@ -11,7 +11,7 @@ import (
 	base_validators "github.com/Subha-Research/svasthfamily-koham/app/base-validators"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/controllers/v1"
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/Subha-Research/svasthfamily-koham/app/routes/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
@@ -41,7 +41,7 @@ func TestCreateToken(t *testing.T) {
 			route:         "/api/v1/family/users/8204a616-2131-4a64-97d0-ae3f2b9211be/tokens",
 			expectedError: false,
 			expectedCode:  201,
-			expectedBody: &dto.CreateTokenResponse{
+			expectedBody: &dtos.CreateTokenResponse{
 				TokenKey:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJGVXNlcklEIjoiODIwNGE2MTYtMjEzMS00YTY0LTk3ZDAtYWUzZjJiOTIxMWJlIiwiQWNjZXNzTGlzdCI6W3siY2hpbGRfbWVtYmVyX2lkIjoiODIwNGE2MTYtMjEzMS00YTY0LTk3ZDAtYWUzZjJiOTIxMWJlIiwiYWNjZXNzX2VudW1zIjpbMTAxLDEwMiwxMDMsMTA0LDEwNSwxMDYsMTA3LDEwOCwxMDldfV0sImlzcyI6InN2YXN0aGZhbWlseS1rb2hhbSIsImV4cCI6MTYxMDA0NDIwMCwiaWF0IjoxNjA5NDM5NDAwfQ.VJ2ln28qTYIQxFSUacByUFbVEDajg7v-inK-ySboQ78",
 				TokenExpiry:  time.Date(2021, 1, 1, 0, 0, 0, 0, loc).Add(constants.TokenExpiryTTL * time.Hour),
 				FamilyUserID: "8204a616-2131-4a64-97d0-ae3f2b9211be",
@@ -92,7 +92,7 @@ func TestCreateToken(t *testing.T) {
 		res, _ := koham_app.Test(req, -1)
 
 		log.Println("Response", res)
-		ctr := &dto.CreateTokenResponse{}
+		ctr := &dtos.CreateTokenResponse{}
 		err := json.NewDecoder(res.Body).Decode(ctr)
 		if err != nil {
 			log.Println(err)

@@ -7,7 +7,7 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/cache"
 	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -25,7 +25,7 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
+func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dtos.GetTokenResponse, error) {
 	result, err := ts.Model.GetToken(f_user_id)
 	if err != nil {
 		error_data := map[string]string{
@@ -53,7 +53,7 @@ func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 	return tv, nil
 }
 
-func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
+func (ts *TokenService) CreateToken(f_user_id string) (*dtos.CreateTokenResponse, error) {
 	err := ts.DeleteToken(&f_user_id, nil)
 	if err != nil {
 		log.Println("Error in deleting token in create token API", err)
@@ -106,7 +106,7 @@ func (ts *TokenService) ParseToken(token_string string, f_user_id string) error 
 	}
 	return nil
 }
-func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
+func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dtos.ValidateTokenResponse, error) {
 	db_token_key, err := ts.GetToken(f_user_id)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 	log.Println("Access realtionship document", acl_doc)
 
 	if acl_doc != nil {
-		vtr := dto.ValidateTokenResponse{}
+		vtr := dtos.ValidateTokenResponse{}
 		vtr.Access = true
 		return &vtr, nil
 	}

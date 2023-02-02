@@ -3,7 +3,7 @@ package services
 import (
 	"log"
 
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	models "github.com/Subha-Research/svasthfamily-koham/app/models"
 	validators "github.com/Subha-Research/svasthfamily-koham/app/validators"
@@ -14,7 +14,7 @@ type ACLService struct {
 	Model *models.AccessRelationshipModel
 }
 
-func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *string, rb validators.ACLPostBody) (*[]dto.CreateACLDTO, error) {
+func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *string, rb validators.ACLPostBody) (*[]dtos.CreateACLDTO, error) {
 	var is_head_head_relation = true
 
 	if token != nil {
@@ -44,7 +44,7 @@ func (acl_s *ACLService) CreateAccessRelationship(f_user_id string, token *strin
 	return inserted_doc_response, nil
 }
 
-func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_type string, rb validators.ACLPutBody) (*dto.UpdateACLDTO, error) {
+func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_type string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
 	var doc bson.M
 	var err error
 
@@ -67,7 +67,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 		return nil, errors.KohamError("KSE-4015")
 	}
 
-	var update_doc_response *dto.UpdateACLDTO
+	var update_doc_response *dtos.UpdateACLDTO
 	var err_update_doc error
 
 	if update_type == "UPDATE_FAMILY_ID" {

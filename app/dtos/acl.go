@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 import (
 	"github.com/Subha-Research/svasthfamily-koham/app/schemas"
