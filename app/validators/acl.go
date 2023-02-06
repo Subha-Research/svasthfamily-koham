@@ -69,17 +69,17 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string,
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			error_data["key"] = err.Field()
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 
 	if !is_head_acl_request {
 		if aclpb.FamilyID == "" {
 			error_data["key"] = "family_id"
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		} else if aclpb.FamilyMemberID == "" {
 			error_data["key"] = "family_member_id"
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 
@@ -91,7 +91,7 @@ func (av *ACLValidator) ValidateACLPostBody(aclpb ACLPostBody, f_user_id string,
 
 			if !is_all_access_present {
 				error_data["key"] = "access_enums"
-				return errors.KohamError("KSE-4006", error_data)
+				return errors.KohamError("SFKSE-4006", error_data)
 			}
 		}
 	}
@@ -109,7 +109,7 @@ func (av *ACLValidator) ValidateACLPutBody(aclputb ACLPutBody, f_user_id string)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			error_data["key"] = err.Field()
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 	if aclputb.Access != nil {
@@ -117,13 +117,13 @@ func (av *ACLValidator) ValidateACLPutBody(aclputb ACLPutBody, f_user_id string)
 		access_enums := access.AccessEnums
 		if access_enums == nil {
 			error_data["key"] = "access_enums"
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 		is_all_access_present := av.validateAccess(access_enums)
 
 		if !is_all_access_present {
 			error_data["key"] = "access_enums"
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 	return nil

@@ -31,7 +31,7 @@ func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dtos.GetTokenResp
 		error_data := map[string]string{
 			"id": f_user_id,
 		}
-		return nil, errors.KohamError("KSE-4010", error_data)
+		return nil, errors.KohamError("SFKSE-4010", error_data)
 	}
 
 	return result, nil
@@ -46,7 +46,7 @@ func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 			error_data := map[string]string{
 				"id": f_user_id,
 			}
-			return nil, errors.KohamError("KSE-4010", error_data)
+			return nil, errors.KohamError("SFKSE-4010", error_data)
 		}
 		tv = &result.TokenKey
 	}
@@ -77,7 +77,7 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dtos.CreateTokenResponse
 	ss, err := token.SignedString(signing_key)
 	if err != nil {
 		log.Println("Error while signing token", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	data, insert_err := ts.Model.InsertToken(f_user_id, ss, token_expiry.Time)
 	if insert_err != nil {
@@ -93,16 +93,16 @@ func (ts *TokenService) ParseToken(token_string string, f_user_id string) error 
 		return []byte(constants.TokenSigingKey), nil
 	})
 	if err != nil {
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	claims, ok := token.Claims.(*TokenClaims)
 	if ok && token.Valid {
 		if claims.RegisteredClaims.Issuer != constants.Issuer {
 			log.Println("Token issuer did not match")
-			return errors.KohamError("KSE-4009")
+			return errors.KohamError("SFKSE-4009")
 		}
 	} else {
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	return nil
 }
@@ -113,7 +113,7 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 	}
 	if *db_token_key != *token {
 		log.Printf("Given token %s did not match with database", *token)
-		return nil, errors.KohamError("KSE-4009")
+		return nil, errors.KohamError("SFKSE-4009")
 	}
 	var acl_doc bson.M
 
@@ -142,7 +142,7 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		vtr.Access = true
 		return &vtr, nil
 	}
-	return nil, errors.KohamError("KSE-4009")
+	return nil, errors.KohamError("SFKSE-4009")
 }
 
 // *token to this function could be nil, in case getting called from CreateToken
@@ -152,7 +152,7 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		error_data := map[string]string{
 			"id": *f_user_id,
 		}
-		return errors.KohamError("KSE-4010", error_data)
+		return errors.KohamError("SFKSE-4010", error_data)
 	}
 
 	var delete_token_key *string
@@ -162,7 +162,7 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		delete_token_key = token
 	} else {
 		log.Printf("Given token %s did not match with database", *token)
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	err_del := ts.Model.DeleteToken(f_user_id, delete_token_key)
 	if err_del != nil {

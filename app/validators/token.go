@@ -25,7 +25,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			error_data["key"] = err.Field()
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 
@@ -38,5 +38,5 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 		}
 	}
 	error_data["key"] = "access"
-	return errors.KohamError("KSE-4006", error_data)
+	return errors.KohamError("SFKSE-4006", error_data)
 }

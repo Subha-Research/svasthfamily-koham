@@ -38,21 +38,21 @@ func (arm *AccessRelationshipModel) GetAllAccessRelationship(f_user_id string) (
 	cursor, err := arm.Collection.Find(context.TODO(), bson.D{{Key: "parent_family_user_id", Value: f_user_id}})
 	if err != nil {
 		log.Println("Error while getting all access relationship", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 
 	// Get a list of all returned documents and print them out.
 	// See the mongo.Cursor documentation for more examples of using cursors.
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		log.Println("Error while getting all access relationship", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	if len(results) == 0 {
 		error_data := map[string]string{
 			"id": f_user_id,
 		}
 		log.Printf("No access relationship found for id %s", f_user_id)
-		return nil, errors.KohamError("KSE-4012", error_data)
+		return nil, errors.KohamError("SFKSE-4012", error_data)
 	}
 	return results, nil
 }
@@ -80,9 +80,9 @@ func (arm *AccessRelationshipModel) GetAccessRelationship(family_id *string, f_m
 		// ErrNoDocuments means that the filter did not match any documents in
 		// the collection.
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.KohamError("KSE-4007")
+			return nil, errors.KohamError("SFKSE-4017")
 		}
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	fmt.Printf("User ID matched %v", result)
 	return result, nil
@@ -109,7 +109,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		}
 
 		if doc != nil {
-			return nil, errors.KohamError("KSE-4009")
+			return nil, errors.KohamError("SFKSE-4009")
 		}
 
 		u_ids := UserIDs{
@@ -158,7 +158,7 @@ func (arm *AccessRelationshipModel) InsertAllAccessRelationship(f_head_user_id s
 		res, err := arm.Collection.InsertMany(context.TODO(), access_list_docs, opts)
 		if err != nil {
 			log.Println("Error in inserting access relation", err)
-			return nil, errors.KohamError("KSE-5001")
+			return nil, errors.KohamError("SFKSE-5001")
 		}
 		fmt.Printf("Inserted documents with IDs %v\n", res.InsertedIDs)
 	}
@@ -189,10 +189,10 @@ func (arm *AccessRelationshipModel) UpdateAccessRelationship(f_head_user_id stri
 			err_data := map[string]string{
 				"id": rb.Access.ChildUserId,
 			}
-			return nil, errors.KohamError("KSE-4012", err_data)
+			return nil, errors.KohamError("SFKSE-4012", err_data)
 		}
 		log.Println("Error in updating family ID", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	log.Println("updated document", updatedDocument)
 
@@ -229,10 +229,10 @@ func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb val
 			err_data := map[string]string{
 				"id": f_head_user_id,
 			}
-			return nil, errors.KohamError("KSE-4012", err_data)
+			return nil, errors.KohamError("SFKSE-4012", err_data)
 		}
 		log.Println("Error in updating family ID", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	log.Println("updated document", updatedDocument)
 
@@ -271,10 +271,10 @@ func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, 
 			err_data := map[string]string{
 				"id": f_head_user_id,
 			}
-			return nil, errors.KohamError("KSE-4012", err_data)
+			return nil, errors.KohamError("SFKSE-4012", err_data)
 		}
 		log.Println("Error in updating family ID", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	log.Println("updated document", updatedDocument)
 
@@ -351,7 +351,7 @@ func (arm *AccessRelationshipModel) getAccessRelation(ids UserIDs,
 	case "CHILD_CHILD":
 		access_relation, dto_response, err = arm.getSchema(ids, relation_type, is_parent_head, child_default_access)
 	default:
-		return nil, nil, errors.KohamError("KSE-4013")
+		return nil, nil, errors.KohamError("SFKSE-4013")
 	}
 	return access_relation, dto_response, err
 }

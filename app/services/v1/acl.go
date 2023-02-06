@@ -55,7 +55,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 		doc, err = acl_s.Model.GetAccessRelationship(nil, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
 	}
 	if err != nil {
-		return nil, errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("SFKSE-4015")
 	}
 
 	relation_type := doc["relationship_type"].(string)
@@ -64,7 +64,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 
 	is_update_allowed := acl_s.isUpdateAllowed(relation_type, is_update_family, is_parent_head)
 	if !is_update_allowed {
-		return nil, errors.KohamError("KSE-4015")
+		return nil, errors.KohamError("SFKSE-4015")
 	}
 
 	var update_doc_response *dtos.UpdateACLDTO

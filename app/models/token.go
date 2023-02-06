@@ -40,7 +40,7 @@ func (tm *TokenModel) InsertToken(f_user_id string, token string, expiry time.Ti
 	res, err := tm.Collection.InsertOne(context.TODO(), ts)
 	if err != nil {
 		log.Println("Error while inserting token... returning internal server error", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	log.Println("Inserted token document with ID", res.InsertedID)
 	// Build response data
@@ -65,8 +65,11 @@ func (tm *TokenModel) GetToken(f_user_id string) (*dtos.GetTokenResponse, error)
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in
 		// the collection.
+		err_data := map[string]string{
+			"f_user_id": f_user_id,
+		}
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.KohamError("KSE-4007")
+			return nil, errors.KohamError("SFKSE-4007", err_data)
 		}
 		return nil, err
 	}
@@ -83,7 +86,7 @@ func (tm *TokenModel) DeleteToken(f_user_id *string, token *string) error {
 	_, err := tm.Collection.DeleteOne(context.TODO(), bson.D{{Key: "family_user_id", Value: f_user_id}, {Key: "token_key", Value: token}})
 	if err != nil {
 		log.Println("Error in deleting token, returning internal service error", err)
-		return errors.KohamError("KSE-5001")
+		return errors.KohamError("SFKSE-5001")
 	}
 	return nil
 }

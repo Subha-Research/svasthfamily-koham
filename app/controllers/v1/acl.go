@@ -84,7 +84,7 @@ func (acl ACLController) Put(c *fiber.Ctx) error {
 		update_type = constants.UPDATE_TYPE["UPDATE_ACCESS_ENUM"].Type
 		access_enum = constants.UPDATE_TYPE["UPDATE_ACCESS_ENUM"].AccessEnum
 	} else {
-		err := errors.KohamError("KSE-4015")
+		err := errors.KohamError("SFKSE-4015")
 		return errors.DefaultErrorHandler(c, err)
 	}
 
