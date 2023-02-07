@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/interfaces"
 	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
@@ -73,21 +72,6 @@ func (acl ACLController) Put(c *fiber.Ctx) error {
 		return errors.DefaultErrorHandler(c, err)
 	}
 
-	// TDOO:: Remove hardcoded access enums
-	if aclputb.FamilyID != "" {
-		update_type = constants.UPDATE_TYPE["UPDATE_FAMILY_ID"].Type
-		access_enum = constants.UPDATE_TYPE["UPDATE_FAMILY_ID"].AccessEnum
-	} else if aclputb.FamilyMemberID != "" {
-		update_type = constants.UPDATE_TYPE["UPDATE_FAMILY_MEMBER_ID"].Type
-		access_enum = constants.UPDATE_TYPE["UPDATE_FAMILY_MEMBER_ID"].AccessEnum
-	} else if aclputb.Access != nil {
-		update_type = constants.UPDATE_TYPE["UPDATE_ACCESS_ENUM"].Type
-		access_enum = constants.UPDATE_TYPE["UPDATE_ACCESS_ENUM"].AccessEnum
-	} else {
-		err := errors.KohamError("SFKSE-4015")
-		return errors.DefaultErrorHandler(c, err)
-	}
-
 	if token != nil {
 		// Validate token access
 		rb := validators.ValidateTokenRB{
@@ -100,13 +84,28 @@ func (acl ACLController) Put(c *fiber.Ctx) error {
 		}
 	}
 
-	update_doc_response, err := acl.Service.UpdateAccessRelationship(f_user_id, update_type, *aclputb)
-	if err != nil {
-		return errors.DefaultErrorHandler(c, err)
+	if aclputb.UpdateType == "UPDATE_ACCESS" {
+		update_doc_response, err := acl.Service.UpdateAccessRelationship(f_user_id, update_type, *aclputb)
+		if err != nil {
+			return errors.DefaultErrorHandler(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(update_doc_response)
+	} else if aclputb.UpdateType == "UPDATE_FAMILY_ID" {
+		update_doc_response, err := acl.Service.UpdateFamilyID(f_user_id, update_type, *aclputb)
+		if err != nil {
+			return errors.DefaultErrorHandler(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(update_doc_response)
+	} else if aclputb.UpdateType == "UPDATE_FAMILY_MEMBER_ID" {
+		update_doc_response, err := acl.Service.UpdateFamilyMemberID(f_user_id, update_type, *aclputb)
+		if err != nil {
+			return errors.DefaultErrorHandler(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(update_doc_response)
+	} else {
+		return errors.DefaultErrorHandler(c, errors.KohamError("KSE-4015"))
 	}
-	return c.Status(fiber.StatusOK).JSON(update_doc_response)
 }
-
 func (acl ACLController) Delete(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("DELETE family ACL")
 }

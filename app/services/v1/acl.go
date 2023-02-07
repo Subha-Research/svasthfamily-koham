@@ -49,20 +49,17 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 	var err error
 
 	// Get Access relation
-	if update_type == "UPDATE_FAMILY_ID" {
-		doc, err = acl_s.Model.GetAccessRelationship(&rb.FamilyID, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
-	} else {
-		doc, err = acl_s.Model.GetAccessRelationship(nil, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
-	}
+
+	doc, err = acl_s.Model.GetAccessRelationship(nil, nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
+
 	if err != nil {
 		return nil, errors.KohamError("SFKSE-4015")
 	}
 
 	relation_type := doc["relationship_type"].(string)
 	is_parent_head := doc["is_parent_head"].(bool)
-	var is_update_family = (update_type == "UPDATE_FAMILY_ID" || update_type != "UPDATE_FAMILY_MEMBER_ID")
 
-	is_update_allowed := acl_s.isUpdateAllowed(relation_type, is_update_family, is_parent_head)
+	is_update_allowed := acl_s.isUpdateAllowed(relation_type, is_parent_head)
 	if !is_update_allowed {
 		return nil, errors.KohamError("SFKSE-4015")
 	}
@@ -70,13 +67,7 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 	var update_doc_response *dtos.UpdateACLDTO
 	var err_update_doc error
 
-	if update_type == "UPDATE_FAMILY_ID" {
-		update_doc_response, err_update_doc = acl_s.Model.UpdateFamilyID(f_head_user_id, rb)
-	} else if update_type == "UPDATE_FAMILY_MEMBER_ID" {
-		update_doc_response, err_update_doc = acl_s.Model.UpdateFamilyMemberID(f_head_user_id, rb)
-	} else if update_type == "UPDATE_SFM_ACCESS" {
-		update_doc_response, err_update_doc = acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
-	}
+	update_doc_response, err_update_doc = acl_s.Model.UpdateAccessRelationship(f_head_user_id, rb)
 
 	if err_update_doc != nil {
 		return nil, err_update_doc
@@ -84,14 +75,28 @@ func (acl_s *ACLService) UpdateAccessRelationship(f_head_user_id string, update_
 
 	return update_doc_response, nil
 }
+func (acl_s *ACLService) UpdateFamilyID(f_head_user_id string, update_type string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
+	// var doc bson.M
+	var err error
 
-func (acl_s *ACLService) isUpdateAllowed(relation_type string, is_update_family bool, is_parent_head bool) bool {
+	// Get Access relation
+	// doc, err = acl_s.Model.GetAccessRelationship(nil, &f_head_user_id, rb.ParentUserID, rb.Access.ChildUserId)
+	if err != nil {
+		return nil, errors.KohamError("KSE-4015")
+	}
+	return nil, nil
+}
+func (acl_s *ACLService) UpdateFamilyMemberID(f_head_user_id string, update_type string, rb validators.ACLPutBody) (*dtos.UpdateACLDTO, error) {
+
+	return nil, nil
+}
+func (acl_s *ACLService) isUpdateAllowed(relation_type string, is_parent_head bool) bool {
 	switch true {
-	case relation_type == "HEAD_HEAD" && !is_update_family:
+	case relation_type == "HEAD_HEAD":
 		return false
 	case relation_type == "PARENT_CHILD" && is_parent_head:
 		return false
-	case relation_type == "PARENT_CHILD" && is_update_family:
+	case relation_type == "PARENT_CHILD":
 		return false
 	case relation_type == "CHILD_CHILD":
 		// TODO :: Raise alert
