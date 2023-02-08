@@ -128,8 +128,12 @@ func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb 
 		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
 	case 116:
 		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
+	case 113:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 114:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
 	default:
-		return nil, errors.KohamError("")
+		return nil, errors.KohamError("SFKSE-4015")
 	}
 	// If error
 	if err != nil {

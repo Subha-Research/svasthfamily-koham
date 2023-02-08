@@ -37,7 +37,7 @@ type ACLPutBody struct {
 	ParentUserID   string           `json:"family_parent_user_id" validate:"omitempty,required_with=Access,uuid4_rfc4122"`
 	FamilyID       string           `json:"family_id" validate:"omitempty,uuid_rfc4122"`
 	FamilyMemberID string           `json:"family_member_id" validate:"omitempty,uuid_rfc4122"`
-	UpdateType     string           `json:"update_type" validate:"required,uuid_rfc4122"`
+	UpdateType     string           `json:"update_type" validate:"required"`
 }
 
 type ACLValidator struct {

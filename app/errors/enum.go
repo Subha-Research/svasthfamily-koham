@@ -27,4 +27,5 @@ var ErrorEnums = map[string]*ErrorStruct{
 	"SFKSE-4015": {405, "SFKSE-4015", "Invalid operation"},
 	"SFKSE-4016": {400, "SFKSE-4016", "All fields can't be empty"},
 	"SFKSE-4017": {400, "SFKSE-4017", "No access relatioship found."},
+	"SFKSE-4018": {400, "SFKSE-4018", "Can't update! :field: is already updated."},
 }

@@ -18,7 +18,7 @@ var UPDATE_TYPE = map[string]*UPDATE_INFO{
 	},
 	"UPDATE_SFM_ACCESS": {
 		Type:       "UPDATE_SFM_ACCESS",
-		AccessEnum: 114,
+		AccessEnum: 103,
 	},
 }
 

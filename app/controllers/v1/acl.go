@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/Subha-Research/svasthfamily-koham/app/constants"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/interfaces"
 	services "github.com/Subha-Research/svasthfamily-koham/app/services/v1"
@@ -55,7 +56,6 @@ func (acl ACLController) Post(c *fiber.Ctx) error {
 }
 
 func (acl ACLController) Put(c *fiber.Ctx) error {
-	var access_enum float64
 	var update_type string
 	token := c.Locals("token").(*string)
 	f_user_id := c.Params("user_id")
@@ -76,7 +76,7 @@ func (acl ACLController) Put(c *fiber.Ctx) error {
 		// Validate token access
 		rb := validators.ValidateTokenRB{
 			ChildUserID: f_user_id,
-			AccessEnum:  access_enum,
+			AccessEnum:  constants.UPDATE_TYPE[aclputb.UpdateType].AccessEnum,
 		}
 		_, err := acl.ITokenService.ValidateTokenAccess(token, f_user_id, rb)
 		if err != nil {

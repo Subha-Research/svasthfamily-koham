@@ -237,14 +237,8 @@ func (arm *AccessRelationshipModel) UpdateFamilyID(f_head_user_id string, rb val
 	log.Println("updated document", updatedDocument)
 
 	uaclr := &dtos.UpdateACLDTO{
-		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
-		HeadUserId:           updatedDocument["head_family_user_id"].(string),
-		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
-		ChildUserID:          updatedDocument["child_family_user_id"].(string),
-		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
-		Audit:                updatedDocument["audit"].(primitive.M),
-		FamilyID:             updatedDocument["family_id"].(string),
-		FamilyMemberID:       updatedDocument["family_member_id"].(string),
+		Audit:    updatedDocument["audit"].(primitive.M),
+		FamilyID: updatedDocument["family_id"].(string),
 	}
 	return uaclr, nil
 }
@@ -279,14 +273,8 @@ func (arm *AccessRelationshipModel) UpdateFamilyMemberID(f_head_user_id string, 
 	log.Println("updated document", updatedDocument)
 
 	uaclr := &dtos.UpdateACLDTO{
-		AccessRelationshipID: updatedDocument["access_relationship_id"].(string),
-		HeadUserId:           updatedDocument["head_family_user_id"].(string),
-		ParentuserId:         updatedDocument["parent_family_user_id"].(string),
-		ChildUserID:          updatedDocument["child_family_user_id"].(string),
-		AccessEnum:           updatedDocument["access_enums"].(primitive.A),
-		Audit:                updatedDocument["audit"].(primitive.M),
-		FamilyID:             updatedDocument["family_id"].(string),
-		FamilyMemberID:       updatedDocument["family_member_id"].(string),
+		Audit:          updatedDocument["audit"].(primitive.M),
+		FamilyMemberID: updatedDocument["family_member_id"].(string),
 	}
 	return uaclr, nil
 }
