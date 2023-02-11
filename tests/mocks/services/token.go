@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/services/v1"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
 	models_mock "github.com/Subha-Research/svasthfamily-koham/tests/mocks/models"
@@ -16,7 +16,7 @@ type TokenServiceTest struct {
 	ARModel *models_mock.AccessRelationshipModelMock
 }
 
-func (tst *TokenServiceTest) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
+func (tst *TokenServiceTest) CreateToken(f_user_id string) (*dtos.CreateTokenResponse, error) {
 	signing_key := []byte(constants.TokenSigingKey)
 	loc, err := time.LoadLocation("Asia/Kolkata")
 	token_expiry := jwt.NewNumericDate(time.Date(2021, 1, 1, 0, 0, 0, 0, loc).Add(constants.TokenExpiryTTL * time.Hour))
@@ -49,7 +49,7 @@ func (tst *TokenServiceTest) ParseToken(token_string string, f_user_id string) e
 	return nil
 }
 
-func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
+func (tst *TokenServiceTest) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dtos.ValidateTokenResponse, error) {
 	return nil, nil
 }
 

@@ -7,12 +7,12 @@ import (
 	"github.com/Subha-Research/svasthfamily-koham/app/cache"
 	"github.com/Subha-Research/svasthfamily-koham/app/common"
 	"github.com/Subha-Research/svasthfamily-koham/app/constants"
-	"github.com/Subha-Research/svasthfamily-koham/app/dto"
+	"github.com/Subha-Research/svasthfamily-koham/app/dtos"
 	"github.com/Subha-Research/svasthfamily-koham/app/errors"
 	"github.com/Subha-Research/svasthfamily-koham/app/models"
 	"github.com/Subha-Research/svasthfamily-koham/app/validators"
 	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type TokenService struct {
@@ -25,13 +25,13 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dto.GetTokenResponse, error) {
+func (ts *TokenService) GetTokenDataFromDb(f_user_id string) (*dtos.GetTokenResponse, error) {
 	result, err := ts.Model.GetToken(f_user_id)
 	if err != nil {
 		error_data := map[string]string{
 			"id": f_user_id,
 		}
-		return nil, errors.KohamError("KSE-4010", error_data)
+		return nil, errors.KohamError("SFKSE-4010", error_data)
 	}
 
 	return result, nil
@@ -46,14 +46,14 @@ func (ts *TokenService) GetToken(f_user_id string) (*string, error) {
 			error_data := map[string]string{
 				"id": f_user_id,
 			}
-			return nil, errors.KohamError("KSE-4010", error_data)
+			return nil, errors.KohamError("SFKSE-4010", error_data)
 		}
 		tv = &result.TokenKey
 	}
 	return tv, nil
 }
 
-func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse, error) {
+func (ts *TokenService) CreateToken(f_user_id string) (*dtos.CreateTokenResponse, error) {
 	err := ts.DeleteToken(&f_user_id, nil)
 	if err != nil {
 		log.Println("Error in deleting token in create token API", err)
@@ -77,7 +77,7 @@ func (ts *TokenService) CreateToken(f_user_id string) (*dto.CreateTokenResponse,
 	ss, err := token.SignedString(signing_key)
 	if err != nil {
 		log.Println("Error while signing token", err)
-		return nil, errors.KohamError("KSE-5001")
+		return nil, errors.KohamError("SFKSE-5001")
 	}
 	data, insert_err := ts.Model.InsertToken(f_user_id, ss, token_expiry.Time)
 	if insert_err != nil {
@@ -93,48 +93,60 @@ func (ts *TokenService) ParseToken(token_string string, f_user_id string) error 
 		return []byte(constants.TokenSigingKey), nil
 	})
 	if err != nil {
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	claims, ok := token.Claims.(*TokenClaims)
 	if ok && token.Valid {
 		if claims.RegisteredClaims.Issuer != constants.Issuer {
 			log.Println("Token issuer did not match")
-			return errors.KohamError("KSE-4009")
+			return errors.KohamError("SFKSE-4009")
 		}
 	} else {
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	return nil
 }
-func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dto.ValidateTokenResponse, error) {
+func (ts *TokenService) ValidateTokenAccess(token *string, f_user_id string, rb validators.ValidateTokenRB) (*dtos.ValidateTokenResponse, error) {
 	db_token_key, err := ts.GetToken(f_user_id)
 	if err != nil {
 		return nil, err
 	}
 	if *db_token_key != *token {
 		log.Printf("Given token %s did not match with database", *token)
-		return nil, errors.KohamError("KSE-4009")
+		return nil, errors.KohamError("SFKSE-4009")
 	}
-	all_access_relations, err := ts.ARModel.GetAllAccessRelationship(f_user_id)
-	acl_dto := dto.AccessRelationshipDTO{}
+	var acl_doc bson.M
+
+	switch rb.AccessEnum {
+	case 115:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 101:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 104:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, &rb.FamilyMemberId, nil, f_user_id, rb.ChildUserID)
+	case 112:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
+	case 116:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(&rb.FamilyId, nil, nil, f_user_id, rb.ChildUserID)
+	case 113:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	case 114:
+		acl_doc, err = ts.ARModel.GetAccessRelationship(nil, nil, &f_user_id, f_user_id, rb.ChildUserID)
+	default:
+		return nil, errors.KohamError("SFKSE-4015")
+	}
+	// If error
 	if err != nil {
 		return nil, err
 	}
-	access_list, _ := acl_dto.FormatAllAccessRelationship(all_access_relations)
+	log.Println("Access realtionship document", acl_doc)
 
-	for _, v := range access_list {
-		if v.ChildUserID == rb.ChildUserID {
-			for _, e := range v.AccessEnums.(primitive.A) {
-				if e.(float64) == rb.AccessEnum {
-					// Build Response
-					vtr := dto.ValidateTokenResponse{}
-					vtr.Access = true
-					return &vtr, nil
-				}
-			}
-		}
+	if acl_doc != nil {
+		vtr := dtos.ValidateTokenResponse{}
+		vtr.Access = true
+		return &vtr, nil
 	}
-	return nil, errors.KohamError("KSE-4009")
+	return nil, errors.KohamError("SFKSE-4009")
 }
 
 // *token to this function could be nil, in case getting called from CreateToken
@@ -144,17 +156,17 @@ func (ts *TokenService) DeleteToken(f_user_id *string, token *string) error {
 		error_data := map[string]string{
 			"id": *f_user_id,
 		}
-		return errors.KohamError("KSE-4010", error_data)
+		return errors.KohamError("SFKSE-4010", error_data)
 	}
 
 	var delete_token_key *string
 	if token == nil {
 		delete_token_key = &result.TokenKey
-	} else if token != nil && *&result.TokenKey == *token {
+	} else if token != nil && result.TokenKey == *token {
 		delete_token_key = token
 	} else {
 		log.Printf("Given token %s did not match with database", *token)
-		return errors.KohamError("KSE-4009")
+		return errors.KohamError("SFKSE-4009")
 	}
 	err_del := ts.Model.DeleteToken(f_user_id, delete_token_key)
 	if err_del != nil {

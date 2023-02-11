@@ -10,8 +10,10 @@ type TokenValidator struct {
 }
 
 type ValidateTokenRB struct {
-	ChildUserID string  `json:"family_child_user_id" validate:"required,uuid4_rfc4122"`
-	AccessEnum  float64 `json:"access_enum" validate:"required,number"`
+	FamilyMemberId string  `json:"family_member_id" validate:"omitempty,uuid4_rfc4122"`
+	FamilyId       string  `json:"family_id" validate:"omitempty,uuid4_rfc4122,required_with=FamilyMemberId"`
+	ChildUserID    string  `json:"family_child_user_id" validate:"required,uuid4_rfc4122"`
+	AccessEnum     float64 `json:"access_enum" validate:"required,number"`
 }
 
 func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
@@ -23,7 +25,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			error_data["key"] = err.Field()
-			return errors.KohamError("KSE-4006", error_data)
+			return errors.KohamError("SFKSE-4006", error_data)
 		}
 	}
 
@@ -34,8 +36,7 @@ func (tv *TokenValidator) ValidateTokenRequestbody(rb ValidateTokenRB) error {
 		if k == rb.AccessEnum {
 			return nil
 		}
-
 	}
 	error_data["key"] = "access"
-	return errors.KohamError("KSE-4006", error_data)
+	return errors.KohamError("SFKSE-4006", error_data)
 }

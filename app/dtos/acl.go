@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 import (
 	"github.com/Subha-Research/svasthfamily-koham/app/schemas"
@@ -22,7 +22,10 @@ type UpdateACLDTO struct {
 	ChildUserID          string      `json:"child_family_user_id"`
 	AccessEnum           primitive.A `json:"access_enums"`
 	Audit                primitive.M `json:"audit"`
+	FamilyID             string      `json:"family_id"`
+	FamilyMemberID       string      `json:"family_member_id"`
 }
+
 type AccessRelation struct {
 	ChildUserID string      `json:"child_family_user_id"`
 	AccessEnums interface{} `json:"access_enums"`

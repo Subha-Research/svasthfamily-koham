@@ -37,7 +37,7 @@ func (k_app *KohamApp) SetupApp() *fiber.App {
 
 	access_coll, _, err := k_app.DB.GetCollectionAndSession("accesses")
 	if err != nil {
-		log.Fatal("Error in  getting collection and session. Stopping server", err)
+		log.Fatal("Error in getting collection and session. Stopping server", err)
 	}
 	// Dependency injection pattern
 	k_app.AccessModel.Collection = access_coll

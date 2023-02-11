@@ -78,7 +78,7 @@ func KohamError(error_code string, data ...map[string]string) *Error {
 var DefaultErrorHandler = func(c *fiber.Ctx, err error) error {
 	// Status code defaults to 500
 	default_error := &Error{
-		ErrorCode:  "KSE-5001",
+		ErrorCode:  "SFKSE-5001",
 		StatusCode: 500,
 		Message:    "Internal Server Error",
 	}
@@ -91,7 +91,7 @@ var DefaultErrorHandler = func(c *fiber.Ctx, err error) error {
 		default_error.ErrorCode = e.ErrorCode
 		default_error.Message = e.Message
 	} else if errors.As(err, &fe) {
-		default_error.ErrorCode = "KSE-0000"
+		default_error.ErrorCode = "SFKSE-0000"
 		default_error.Message = fe.Message
 		default_error.StatusCode = fe.Code
 	}
